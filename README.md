@@ -15,7 +15,7 @@ SleepyTools is a set of independent tools for compositing work in Nuke. Each one
 folder, installs on its own, and adds itself under a single **`Nuke > SleepyTools`** menu. Install
 the ones you want and ignore the rest.
 
-**Jump to:** [The tools](#the-tools) · [Renders, projects and versions](#renders-projects-and-versions) · [Writing and checking](#writing-and-checking) · [Node libraries](#node-libraries) · [Small helpers](#small-helpers) · [Requirements](#requirements) · [Installation](#installation) · [Finding things in Nuke](#finding-things-in-nuke) · [License](#license)
+**Jump to:** [The tools](#the-tools) · [Renders, projects and versions](#renders-projects-and-versions) · [Writing and checking](#writing-and-checking) · [Node libraries](#node-libraries) · [Small helpers](#small-helpers) · [Requirements](#requirements) · [Installation](#installation) · [Where your data lives](#where-your-data-lives) · [Finding things in Nuke](#finding-things-in-nuke) · [License](#license)
 
 ---
 
@@ -309,6 +309,47 @@ Notes:
 
 Replace the tool folder with the new version and restart Nuke. Settings are stored outside the tool
 folders, so they are kept.
+
+### Uninstalling
+
+1. Close Nuke.
+2. Delete the tool's folder from your `.nuke` folder, and remove its `nuke.pluginAddPath(...)` line
+   from `~/.nuke/init.py`.
+3. Optionally delete the tool's data (see [Where your data lives](#where-your-data-lives)).
+
+Two tools add something outside their own folder:
+
+- **Sleepy Queue** copies `sleepy_queue_nuke_integration.py` and `sleepy_queue_path.txt` into
+  `~/.nuke`, and adds a block starting with `# Sleepy Queue integration` to `~/.nuke/menu.py`.
+  Delete both files and that block.
+- **Sleepy Text:** if you added `import nuke_text_editor` and `nuke_text_editor.install()` to your
+  own `menu.py`, remove those lines.
+
+---
+
+## Where your data lives
+
+On Windows, `~` is `C:\Users\<you>`. Sleepy Knobs and the gizmos store nothing outside your Nuke
+scripts.
+
+| Tool | What it stores | Where |
+|---|---|---|
+| Sleepy Queue | Settings and queue, render logs, script snapshots, crash-recovery file | `~/.nuke_batch_render_config.json`, `~/.nuke_batch_render_logs/`, `~/.nuke_batch_render_snapshots/`, `~/.sleepy_queue_recovery.json` |
+| Sleepy Shell | Preferences, recent projects, session times, scan cache | `%LOCALAPPDATA%\SleepyTools\` (`~/SleepyTools/` where there is no `LOCALAPPDATA`) |
+| Sleepy Snapshots | The snapshots themselves | A `.snapshots` folder next to each script |
+| | Settings | `~/.nuke/snapshot_browser.json` (set `SNAPSHOT_BROWSER_HOME` to use another folder) |
+| Sleepy Text | Preferences | Qt settings under `SleepyTools / NukeTextEditor` (the registry on Windows) |
+| | Bookmarks, recovery, history, templates, snippets, scratchpad, time logs, diagnostics | `~/.nuke/text_editor/` (set `NUKE_TEXT_EDITOR_DATA` to move it) |
+| | Node notes and script notes | Inside the Nuke script |
+| Sleepy Doctor | Settings | `~/.nuke/sleepy_script_doctor.json` |
+| | Ignored findings | Inside the Nuke script |
+| Sleepy Expressions | Your own recipes | `~/.nuke/sleepy_expression_lab_user.json` |
+| Sleepy Blink | Your own kernels | `~/.nuke/sleepy_blinkscript_lab_user.json` |
+| Sleepy Library | Your setups | `~/.nuke/sleepy_setup_library/`, plus any shared folders you add |
+| | Panel settings | `~/.nuke/sleepy_setup_library_prefs.json` |
+| Sleepy Scrub | Settings for Scrub and Node Info | `%LOCALAPPDATA%\SleepyTools\sleepy_scrub.json` and `sleepy_node_info.json` |
+| Command Palette | Recent commands | `~/.nuke/sleepy_palette_recent.json` |
+| SleepyCore | Shared settings and crash logs | `~/.nuke/sleepy_core/settings.json` and `~/.nuke/sleepy_core/crash_logs/` |
 
 ---
 
