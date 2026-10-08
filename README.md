@@ -15,30 +15,30 @@ SleepyTools is a set of independent tools for compositing work in Nuke. Each one
 folder, installs on its own, and adds itself under a single **`Nuke > SleepyTools`** menu. Install
 the ones you want and ignore the rest.
 
-**Jump to:** [The tools](#the-tools) · [In detail](#in-detail) · [Requirements](#requirements) · [Installation](#installation) · [Finding things in Nuke](#finding-things-in-nuke) · [License](#license)
+**Jump to:** [The tools](#the-tools) · [Renders, projects and versions](#renders-projects-and-versions) · [Writing and checking](#writing-and-checking) · [Node libraries](#node-libraries) · [Small helpers](#small-helpers) · [Requirements](#requirements) · [Installation](#installation) · [Finding things in Nuke](#finding-things-in-nuke) · [License](#license)
 
 ---
 
 ## The tools
 
-| Tool | Runs as | What it is for |
-|---|---|---|
-| [**Sleepy Queue**](SleepyQueue) | Standalone app + Nuke menu | A local render queue with resume, crash recovery and a live frame preview. |
-| [**Sleepy Shell**](SleepyShell) | Standalone window + Nuke panel | A project manager: browse projects and shots, launch Nuke on the right script. |
-| [**Sleepy Snapshots**](SleepySnapshots) | Nuke panel + standalone | A timeline of script versions and snapshots, with compare, revert and node history. |
-| [**Sleepy Text**](SleepyText) | Floating window or docked panel | A text and code editor inside Nuke, with notes, tasks, Python and shot checks. |
-| [**Sleepy Doctor**](SleepyDoctor) | Floating window or docked panel | Scans a script for problems, explains each one and profiles node timings. |
-| [**Sleepy Expressions**](SleepyExpressions) | Docked panel | Expression Lab: 161 ready-made Expression recipes. |
-| [**Sleepy Blink**](SleepyBlink) | Docked panel | BlinkScript Lab: 16 ready-made BlinkScript kernels. |
-| [**Sleepy Library**](SleepyLibrary) | Docked panel | Save node setups with a thumbnail and tags, and insert them again. |
-| [**Sleepy Knobs**](SleepyKnobs) | Right-click menu + window | Ready-made animation expressions for any number knob, with a live curve preview. |
-| [**Sleepy Scrub**](SleepyScrub) | Always on in the GUI | Flame-style value scrubbing for numeric fields, plus a hover info card on nodes. |
-| [**SleepyTools gizmo pack**](SleepyTools) | Nodes toolbar | 21 gizmos in six categories, a Command Palette and a Gizmo Manager. |
-| [**SleepyCore**](SleepyCore) | Library | Shared code: Qt 5/6 compatibility, settings, crash log, theme and menu helpers. |
+| | Tool | Runs as | What it is for |
+|---|---|---|---|
+| **Renders, projects and versions** | [**Sleepy Queue**](SleepyQueue) | Standalone app + Nuke menu | A local render queue with resume, crash recovery and a live frame preview. |
+| | [**Sleepy Shell**](SleepyShell) | Standalone window + Nuke panel | A project manager: browse projects and shots, launch Nuke on the right script. |
+| | [**Sleepy Snapshots**](SleepySnapshots) | Nuke panel + standalone | A timeline of script versions and snapshots, with compare, revert and node history. |
+| **Writing and checking** | [**Sleepy Text**](SleepyText) | Floating window or docked panel | A text and code editor inside Nuke, with notes, tasks, Python and shot checks. |
+| | [**Sleepy Doctor**](SleepyDoctor) | Floating window or docked panel | Scans a script for problems, explains each one and profiles node timings. |
+| **Node libraries** | [**Sleepy Expressions**](SleepyExpressions) | Docked panel | Expression Lab: 161 ready-made Expression recipes. |
+| | [**Sleepy Blink**](SleepyBlink) | Docked panel | BlinkScript Lab: 16 ready-made BlinkScript kernels. |
+| | [**Sleepy Library**](SleepyLibrary) | Docked panel | Save node setups with a thumbnail and tags, and insert them again. |
+| | [**SleepyTools gizmo pack**](SleepyTools) | Nodes toolbar | 21 gizmos in six categories, a Command Palette and a Gizmo Manager. |
+| **Small helpers** | [**Sleepy Knobs**](SleepyKnobs) | Right-click menu + window | Ready-made animation expressions for any number knob, with a live curve preview. |
+| | [**Sleepy Scrub**](SleepyScrub) | Always on in the GUI | Flame-style value scrubbing for numeric fields, plus a hover info card on nodes. |
+| **Shared code** | [**SleepyCore**](SleepyCore) | Library | Qt 5/6 compatibility, settings, crash log, theme and menu helpers. |
 
 ---
 
-## In detail
+## Renders, projects and versions
 
 ### Sleepy Queue: a render queue on your own machine
 
@@ -61,6 +61,8 @@ frame, and deals with the usual problems. No render farm needed.
 
 [Full documentation](SleepyQueue/README.md)
 
+---
+
 ### Sleepy Shell: a project manager
 
 <img src="SleepyShell/SleepyShell.png" alt="Sleepy Shell" width="760">
@@ -77,6 +79,8 @@ you can open before Nuke starts, and as a docked panel inside Nuke.
 - **Three interface variants:** the main Project Manager, a Production view and a Nuke-style view.
 
 Requires [SleepyCore](SleepyCore). [Full documentation](SleepyShell/README.md)
+
+---
 
 ### Sleepy Snapshots: every version of a comp on one timeline
 
@@ -97,6 +101,10 @@ the past without versioning up.
 - **Also runs outside Nuke:** `python -m snapbrowser your_script.nk`.
 
 [Full documentation](SleepySnapshots/README.md)
+
+---
+
+## Writing and checking
 
 ### Sleepy Text: an editor that lives in Nuke
 
@@ -121,6 +129,8 @@ without leaving Nuke.
 
 [Full documentation](SleepyText/README.md)
 
+---
+
 ### Sleepy Doctor: find what is wrong with a script
 
 <img src="SleepyDoctor/SleepyDoctor.png" alt="Sleepy Doctor" width="760">
@@ -140,6 +150,10 @@ fix it, with a link to the Foundry documentation.
 
 Nothing is scanned until you press a button. [Full documentation](SleepyDoctor/README.txt)
 
+---
+
+## Node libraries
+
 ### Sleepy Expressions: a library of Expression recipes
 
 <img src="SleepyExpressions/SleepyExpressions.png" alt="Sleepy Expressions" width="760">
@@ -155,6 +169,8 @@ sliders, colour pickers and viewer handles.
 - **Save your own** Expression nodes as recipes.
 
 [Folder](SleepyExpressions)
+
+---
 
 ### Sleepy Blink: a library of BlinkScript kernels
 
@@ -172,6 +188,8 @@ set.
 
 [Folder](SleepyBlink)
 
+---
+
 ### Sleepy Library: your own setup library
 
 Select nodes, give the setup a name, category, tags and description, and save it with a thumbnail
@@ -185,30 +203,7 @@ double-click to insert it connected to your selection.
 
 [Folder](SleepyLibrary)
 
-### Sleepy Knobs: ready-made animation for any knob
-
-Right-click any number knob and pick **Sleepy Knob Expressions** to put a ready-made expression on it.
-
-- **Wiggle, jitter, sine, square and saw waves, bounce, spring, ease, flicker,** constant speed,
-  random per node, quantise and clamp, plus key-based ones: loop, ping-pong, time offset, stepped
-  (on twos), smoothing and speed change.
-- **Live curve preview,** and optional slider knobs on a *Sleepy Anim* tab so you can keep tweaking.
-- **Bake to keys** when you are done, which is safe for the farm and for exporting.
-
-[Folder](SleepyKnobs)
-
-### Sleepy Scrub: Flame-style value handling
-
-Two small tools that change how Nuke's Properties panel and Node Graph feel. Nodes, connections and
-colours are never touched.
-
-- **Scrub:** press and drag on a numeric field to change it live. `Shift` is coarse, `Ctrl` is
-  fine and `Alt` snaps. Double-click resets, and one drag is one undo step.
-- **Calculator:** click a field and type `0.75`, `2*3+1`, or a relative edit such as `+5` or `*2`.
-- **Node Info:** a hover card on nodes with resolution, format, frame range, layers and file,
-  `F1` to `F4` to view Front, Back, Matte or Result, and a side-by-side comparison of two nodes.
-
-[Folder](SleepyScrub)
+---
 
 ### The gizmo pack, Command Palette and Gizmo Manager
 
@@ -224,6 +219,41 @@ tile colours by category, and a node graph laid out so you can read it.
 - **Previews** of every gizmo's node graph in `docs/previews`.
 
 [Full documentation](SleepyTools/docs/README.md) · [Changelog](SleepyTools/docs/CHANGELOG.md)
+
+---
+
+## Small helpers
+
+### Sleepy Knobs: ready-made animation for any knob
+
+Right-click any number knob and pick **Sleepy Knob Expressions** to put a ready-made expression on it.
+
+- **Wiggle, jitter, sine, square and saw waves, bounce, spring, ease, flicker,** constant speed,
+  random per node, quantise and clamp, plus key-based ones: loop, ping-pong, time offset, stepped
+  (on twos), smoothing and speed change.
+- **Live curve preview,** and optional slider knobs on a *Sleepy Anim* tab so you can keep tweaking.
+- **Bake to keys** when you are done, which is safe for the farm and for exporting.
+
+[Folder](SleepyKnobs)
+
+---
+
+### Sleepy Scrub: Flame-style value handling
+
+Two small tools that change how Nuke's Properties panel and Node Graph feel. Nodes, connections and
+colours are never touched.
+
+- **Scrub:** press and drag on a numeric field to change it live. `Shift` is coarse, `Ctrl` is
+  fine and `Alt` snaps. Double-click resets, and one drag is one undo step.
+- **Calculator:** click a field and type `0.75`, `2*3+1`, or a relative edit such as `+5` or `*2`.
+- **Node Info:** a hover card on nodes with resolution, format, frame range, layers and file,
+  `F1` to `F4` to view Front, Back, Matte or Result, and a side-by-side comparison of two nodes.
+
+[Folder](SleepyScrub)
+
+---
+
+## Shared code
 
 ### SleepyCore: the shared layer
 
