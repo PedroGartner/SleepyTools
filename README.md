@@ -407,6 +407,18 @@ It needs NukeX (F_ReGrain). Everything else in the gizmo pack uses standard Nuke
 
 ---
 
+## Feedback
+
+Found a bug or have an idea? Open an [issue](https://github.com/PedroGartner/SleepyTools/issues).
+It helps to say which tool it is, which Nuke version and operating system you use, what you did,
+and to paste any text from the Script Editor or the terminal.
+
+## Author
+
+Made by [Pedro Gartner](https://github.com/PedroGartner).
+
+---
+
 ## License
 
 The code in this repository is released under the [MIT License](LICENSE), except
