@@ -15,7 +15,7 @@ SleepyTools is a set of independent tools for compositing work in Nuke. Each one
 folder, installs on its own, and adds itself under a single **`Nuke > SleepyTools`** menu. Install
 the ones you want and ignore the rest.
 
-**Jump to:** [The tools](#the-tools) · [Renders, projects and versions](#renders-projects-and-versions) · [Writing and checking](#writing-and-checking) · [Node libraries](#node-libraries) · [Small helpers](#small-helpers) · [Requirements](#requirements) · [Installation](#installation) · [Where your data lives](#where-your-data-lives) · [Finding things in Nuke](#finding-things-in-nuke) · [License](#license)
+**Jump to:** [The tools](#the-tools) · [Renders, projects and versions](#renders-projects-and-versions) · [Writing and checking](#writing-and-checking) · [Node libraries](#node-libraries) · [Small helpers](#small-helpers) · [Requirements](#requirements) · [Installation](#installation) · [Where your data lives](#where-your-data-lives) · [Finding things in Nuke](#finding-things-in-nuke) · [Troubleshooting](#troubleshooting) · [License](#license)
 
 ---
 
@@ -371,6 +371,39 @@ Panels can also be opened from **Pane menu > Windows > Custom**.
 | Value scrubbing and node info | `Nuke > SleepyTools > Scrub Fields` and `Node Info` |
 | Gizmos | Nodes toolbar > SleepyTools, one submenu per category |
 | Command Palette and Gizmo Manager | `Nuke > SleepyTools` (`Ctrl+Alt+Space` opens the palette) |
+
+---
+
+## Troubleshooting
+
+**Nothing shows up in Nuke.**
+Check that the tool's folder is in your `.nuke` folder and that `~/.nuke/init.py` has its
+`nuke.pluginAddPath(...)` line, then restart Nuke. Look in Nuke's Script Editor output (or the
+terminal you started Nuke from) for an error such as `Sleepy Expressions failed to load`. Menus are
+built in a Nuke GUI session, not in render or terminal sessions.
+
+**I replaced a tool and nothing changed.**
+Restart Nuke after replacing a tool folder.
+
+**Sleepy Shell does not load.**
+It requires `SleepyCore`. Install both folders and add both `nuke.pluginAddPath(...)` lines.
+
+**Sleepy Queue does not open, or Nuke cannot find a Python for it.**
+Sleepy Queue needs a normal Python with PySide6, not Nuke's own. Install it with
+`python -m pip install PySide6 psutil`, or set the environment variable `SLEEPY_QUEUE_PYTHON` to
+that `python.exe`. Startup errors are written to `~/.nuke_batch_render_logs/sleepy_queue_errors.log`.
+More in the [Sleepy Queue README](SleepyQueue/README.md#troubleshooting).
+
+**A standalone launcher does not start.**
+`SleepyShell.bat` and `SleepySnapshots.bat` point at a Python on your machine. Open the file and
+change the `PYTHON` line (Sleepy Shell) or the `NUKE_PYTHON` line (Sleepy Snapshots) to your own
+path.
+
+**Creating a BlinkScript node fails.**
+Your Nuke licence may only allow BlinkScript in NukeX.
+
+**SleepyGrain's synthetic mode.**
+It needs NukeX (F_ReGrain). Everything else in the gizmo pack uses standard Nuke nodes.
 
 ---
 
