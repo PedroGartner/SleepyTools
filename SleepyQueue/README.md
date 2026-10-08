@@ -51,7 +51,7 @@ Rendering from the Nuke GUI blocks your session, and queuing several comps overn
 - Desktop notifications
 
 ### Nuke integration
-- **Nuke › Sleepy Queue** menu:
+- **Nuke › SleepyTools › Sleepy Queue** menu:
   - *Send Selected Write(s)* (`Ctrl+Alt+B`)
   - *Send All Writes*
   - *Send Selected Write(s) – Current Frame*

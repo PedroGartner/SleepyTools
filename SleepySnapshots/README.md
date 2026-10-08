@@ -97,7 +97,7 @@ You can also drop a `.nk` file on the window or use *File > Open Script*.
 
 ## Install
 
-Copy the `SnapshotBrowser` folder next to your other tools. If the folder is
+Copy the `SleepySnapshots` folder next to your other tools. If the folder is
 added to Nuke's plugin path, its `menu.py` loads the tool. To load it by hand,
 add this to your own `menu.py`:
 
@@ -107,7 +107,7 @@ sys.path.append("/path/to/SleepySnapshots")
 import sleepy_snapshots
 ```
 
-This adds **Nuke > Snapshots** and a **Snapshot Browser** entry in the Pane menu.
+This adds **Nuke > SleepyTools > Snapshots** and a **Snapshot Browser** entry in the Pane menu.
 
 ## Where snapshots live
 
@@ -192,7 +192,7 @@ folder. A hotkey change takes effect after restarting Nuke.
 ## Layout
 
 ```
-SnapshotBrowser/
+SleepySnapshots/
   menu.py                  loads the tool when the folder is a plugin path
   sleepy_snapshots.py      entry point, registers menus and callbacks
   SleepySnapshots.bat      standalone launcher (Windows)
