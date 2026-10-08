@@ -1,0 +1,401 @@
+#! C:/Program Files/Nuke13.2v4/nuke-13.2.4.dll -nx
+version 13.2 v4
+Gizmo {
+ tile_color 0xb04a4aff
+ inputs 2
+ help "Compare two images. By Sean Danischevsky 2004...2011...2015...\nv2: heatmap mode (red = changed more than the threshold), 'Don't set' range option works, empty menu entries removed."
+ label "Range: \[value FrameRange1.first_frame]-\[value FrameRange1.last_frame]"
+ addUserKnob {20 Compare_sd l "Controls" t "by Sean Danischevsky 2017"}
+ addUserKnob {26 sleepy_title l "" +STARTLINE T "<b><font size=\"4\">CompareQC</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v2.0 &middot; QC</font><br><font color=\"#a8a8a8\">Difference, emboss, anaglyph or heatmap comparison of two images.</font>"}
+ addUserKnob {26 sleepy_title_div l "" +STARTLINE}
+ addUserKnob {4 range t "Output frame range: overlap of both inputs (Min), union (Max), or leave it alone." M {Min Max "Don't set"}}
+ addUserKnob {4 method M {difference emboss anaglyph heatmap}}
+ addUserKnob {20 differencegrade l "difference grade" n 1}
+ addUserKnob {41 gamma_1 l gamma T GradeGamma1.gamma}
+ addUserKnob {41 white_1 l gain T GradeExposure1.white}
+ addUserKnob {20 endGroup n -1}
+ addUserKnob {20 embossgrade l "emboss grade" n 1}
+ addUserKnob {41 gamma T GradeGamma.gamma}
+ addUserKnob {41 white l gain T GradeExposure.white}
+ addUserKnob {20 endGroup_1 l endGroup n -1}
+ addUserKnob {20 heatmapgrp l heatmap n 1}
+ addUserKnob {7 threshold t "Pixels that differ by more than this (in any channel) turn red." R 0 0.1}
+ threshold 0.002
+ addUserKnob {7 dim l "background brightness"}
+ dim 0.3
+ addUserKnob {20 endGroup_2 l endGroup n -1}
+ addUserKnob {20 sleepy_about l About}
+ addUserKnob {26 sleepy_about_text l "" +STARTLINE T "<b><font size=\"4\">CompareQC</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v2.0 &middot; QC &middot; SleepyTools</font><br><br><b>Inputs</b><table><tr><td><b>Input1</b>&nbsp;&nbsp;</td><td>image A</td></tr><tr><td><b>Input2</b>&nbsp;&nbsp;</td><td>image B</td></tr></table><br><b>How it works</b><br>Compare two images. By Sean Danischevsky 2004...2011...2015...<br>v2: heatmap mode (red = changed more than the threshold), &#x27;Don&#x27;t set&#x27; range option works, empty menu entries removed."}
+}
+ BackdropNode {
+  inputs 0
+  name BD_Heatmap
+  tile_color 0x4f2c2cff
+  label "Heatmap"
+  note_font_size 24
+  xpos 300
+  ypos 22
+  bdwidth 140
+  bdheight 92
+  z_order 0
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Anaglyph
+  tile_color 0x4f2c2cff
+  label "Anaglyph"
+  note_font_size 24
+  xpos 490
+  ypos 22
+  bdwidth 280
+  bdheight 236
+  z_order 1
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Emboss
+  tile_color 0x4f2c2cff
+  label "Emboss"
+  note_font_size 24
+  xpos 820
+  ypos 22
+  bdwidth 140
+  bdheight 308
+  z_order 2
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Difference
+  tile_color 0x4f2c2cff
+  label "Difference"
+  note_font_size 24
+  xpos 1010
+  ypos 22
+  bdwidth 140
+  bdheight 236
+  z_order 3
+ }
+ Input {
+  inputs 0
+  name Input1
+  xpos 140
+  ypos 0
+ }
+set N_Input1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Input1_1
+  xpos 174
+  ypos 75
+ }
+set N_Dot_Input1_1 [stack 0]
+push $N_Input1
+ Dot {
+  inputs 1
+  name Dot_Input1_2
+  xpos 174
+  ypos 39
+ }
+set N_Dot_Input1_2 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Input1_2_3
+  xpos 694
+  ypos 39
+ }
+set N_Dot_Dot_Input1_2_3 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Input1_2_3_4
+  xpos 884
+  ypos 39
+ }
+set N_Dot_Dot_Dot_Input1_2_3_4 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Input1_2_3_4_5
+  xpos 1004
+  ypos 39
+ }
+set N_Dot_Dot_Dot_Dot_Input1_2_3_4_5 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6
+  xpos 1004
+  ypos 75
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6 [stack 0]
+ Input {
+  inputs 0
+  number 1
+  name Input2
+  xpos 0
+  ypos 0
+ }
+set N_Input2 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Input2_7
+  xpos 34
+  ypos 47
+ }
+set N_Dot_Input2_7 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Input2_7_8
+  xpos 364
+  ypos 47
+ }
+set N_Dot_Dot_Input2_7_8 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Input2_7_8_9
+  xpos 554
+  ypos 47
+ }
+set N_Dot_Dot_Dot_Input2_7_8_9 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Input2_7_8_9_10
+  xpos 814
+  ypos 47
+ }
+set N_Dot_Dot_Dot_Dot_Input2_7_8_9_10 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Input2_7_8_9_10_11
+  xpos 814
+  ypos 147
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Input2_7_8_9_10_11 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Input2_7_8_9_10
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Input2_7_8_9_10_12
+  xpos 1074
+  ypos 47
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Input2_7_8_9_10_12 [stack 0]
+push $N_Dot_Input1_1
+push $N_Dot_Dot_Input2_7_8
+ MergeExpression {
+  inputs 2
+  expr0 "max(abs(Ar-Br),abs(Ag-Bg),abs(Ab-Bb))>parent.threshold ? 1 : (0.2126*Br+0.7152*Bg+0.0722*Bb)*parent.dim"
+  expr1 "max(abs(Ar-Br),abs(Ag-Bg),abs(Ab-Bb))>parent.threshold ? 0 : (0.2126*Br+0.7152*Bg+0.0722*Bb)*parent.dim"
+  expr2 "max(abs(Ar-Br),abs(Ag-Bg),abs(Ab-Bb))>parent.threshold ? 0 : (0.2126*Br+0.7152*Bg+0.0722*Bb)*parent.dim"
+  expr3 Ba
+  name Heatmap
+  xpos 330
+  ypos 72
+ }
+set N_Heatmap [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Heatmap_13
+  xpos 364
+  ypos 363
+ }
+set N_Dot_Heatmap_13 [stack 0]
+push $N_Dot_Dot_Input1_2_3
+ Saturation {
+  inputs 1
+  saturation 0
+  name Saturation1
+  xpos 660
+  ypos 72
+ }
+set N_Saturation1 [stack 0]
+ Grade {
+  inputs 1
+  white {1 0 0 1}
+  black_clamp false
+  name Grade2
+  xpos 660
+  ypos 144
+ }
+set N_Grade2 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Grade2_14
+  xpos 694
+  ypos 219
+ }
+set N_Dot_Grade2_14 [stack 0]
+push $N_Dot_Dot_Dot_Input2_7_8_9
+ Saturation {
+  inputs 1
+  saturation 0
+  name Saturation2
+  xpos 520
+  ypos 72
+ }
+set N_Saturation2 [stack 0]
+ Grade {
+  inputs 1
+  white {0 1 0 1}
+  black_clamp false
+  name Grade5
+  xpos 520
+  ypos 144
+ }
+set N_Grade5 [stack 0]
+push $N_Dot_Grade2_14
+push $N_Grade5
+ Merge2 {
+  inputs 2
+  operation plus
+  name Merge26
+  xpos 520
+  ypos 216
+ }
+set N_Merge26 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Merge26_15
+  xpos 554
+  ypos 255
+ }
+set N_Dot_Merge26_15 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Merge26_15_16
+  xpos 104
+  ypos 255
+ }
+set N_Dot_Dot_Merge26_15_16 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Merge26_15_16_17
+  xpos 104
+  ypos 363
+ }
+set N_Dot_Dot_Dot_Merge26_15_16_17 [stack 0]
+push $N_Dot_Dot_Dot_Input1_2_3_4
+ Invert {
+  inputs 1
+  name Invert1
+  xpos 850
+  ypos 72
+ }
+set N_Invert1 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_Input2_7_8_9_10_11
+push $N_Invert1
+ Dissolve {
+  inputs 2
+  which 0.5
+  name Dissolve1
+  xpos 850
+  ypos 144
+ }
+set N_Dissolve1 [stack 0]
+ Grade {
+  inputs 1
+  gamma 0.2
+  black_clamp false
+  name GradeGamma
+  xpos 850
+  ypos 216
+ }
+set N_GradeGamma [stack 0]
+ Grade {
+  inputs 1
+  white 7
+  black_clamp false
+  name GradeExposure
+  xpos 850
+  ypos 288
+ }
+set N_GradeExposure [stack 0]
+ Dot {
+  inputs 1
+  name Dot_GradeExposure_18
+  xpos 884
+  ypos 327
+ }
+set N_Dot_GradeExposure_18 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_GradeExposure_18_19
+  xpos 116
+  ypos 327
+ }
+set N_Dot_Dot_GradeExposure_18_19 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_GradeExposure_18_19_20
+  xpos 116
+  ypos 363
+ }
+set N_Dot_Dot_Dot_GradeExposure_18_19_20 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6
+push $N_Dot_Dot_Dot_Dot_Dot_Input2_7_8_9_10_12
+ Merge2 {
+  inputs 2
+  operation difference
+  name Merge1
+  xpos 1040
+  ypos 72
+ }
+set N_Merge1 [stack 0]
+ Grade {
+  inputs 1
+  gamma 2
+  black_clamp false
+  name GradeGamma1
+  xpos 1040
+  ypos 144
+ }
+set N_GradeGamma1 [stack 0]
+ Grade {
+  inputs 1
+  black_clamp false
+  name GradeExposure1
+  xpos 1040
+  ypos 216
+ }
+set N_GradeExposure1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_GradeExposure1_21
+  xpos 1074
+  ypos 263
+ }
+set N_Dot_GradeExposure1_21 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_GradeExposure1_21_22
+  xpos 34
+  ypos 263
+ }
+set N_Dot_Dot_GradeExposure1_21_22 [stack 0]
+push $N_Dot_Heatmap_13
+push $N_Dot_Dot_Dot_Merge26_15_16_17
+push $N_Dot_Dot_Dot_GradeExposure_18_19_20
+push $N_Dot_Dot_GradeExposure1_21_22
+ Switch {
+  inputs 4
+  which {{parent.method}}
+  name SwitchMethod
+  xpos 0
+  ypos 360
+ }
+set N_SwitchMethod [stack 0]
+ FrameRange {
+  inputs 1
+  first_frame {{"range==0 ? max(Input1.first_frame,Input2.first_frame) : min(Input1.first_frame,Input2.first_frame)"}}
+  last_frame {{"range==0 ? min(Input1.last_frame,Input2.last_frame) : max(Input1.last_frame,Input2.last_frame)"}}
+  time ""
+  disable {{parent.range==2}}
+  name FrameRange1
+  xpos 0
+  ypos 432
+ }
+set N_FrameRange1 [stack 0]
+ Output {
+  inputs 1
+  name Output1
+  xpos 0
+  ypos 504
+ }
+set N_Output1 [stack 0]
+end_group

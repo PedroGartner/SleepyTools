@@ -1,0 +1,703 @@
+#! C:/Program Files/Nuke13.2v4/nuke-13.2.4.dll -nx
+version 13.2 v4
+Gizmo {
+ tile_color 0x4f7fb5ff
+ inputs 2
+ knobChanged "k = nuke.thisKnob()\nif k.name() == 'inputChange':\n    n = nuke.thisNode()\n    n\['use_mask'].setValue(n.input(1) is not None)\n"
+ help "Temporal median: for every pixel, takes the median of the surrounding frames. Removes rain, dust, flicker spikes and things that pass through a locked-off (or stabilised) shot.\n\nExact median of 3 or 5 frames. 'frame step' spaces the samples further apart for slower-moving objects. Optional mask limits it to an area."
+ addUserKnob {20 tm l "Controls"}
+ addUserKnob {26 sleepy_title l "" +STARTLINE T "<b><font size=\"4\">Sleepy TemporalMedian</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v1.0 &middot; Cleanup</font><br><font color=\"#a8a8a8\">Exact median of 3 or 5 frames to remove rain, dust and passers-by.</font>"}
+ addUserKnob {26 sleepy_title_div l "" +STARTLINE}
+ addUserKnob {4 frames M {"3 frames" "5 frames"}}
+ frames "5 frames"
+ addUserKnob {3 step l "frame step" t "Distance between sampled frames."}
+ step 1
+ addUserKnob {6 use_mask l "use mask input" t "Ticks itself when you connect that input with the node panel open. Tick it by hand if Nuke did not catch the connection." +STARTLINE}
+ addUserKnob {26 sleepy_mix_div l "" +STARTLINE}
+ addUserKnob {7 mix t "Blend between the untouched input (0) and the result (1)."}
+ mix 1
+ addUserKnob {20 sleepy_about l About}
+ addUserKnob {26 sleepy_about_text l "" +STARTLINE T "<b><font size=\"4\">Sleepy TemporalMedian</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v1.0 &middot; Cleanup &middot; SleepyTools</font><br><br><b>Inputs</b><table><tr><td><b>Input1</b>&nbsp;&nbsp;</td><td>locked-off or stabilised plate</td></tr><tr><td><b>mask</b>&nbsp;&nbsp;</td><td>optional: limit the effect</td></tr></table><br><b>How it works</b><br>Temporal median: for every pixel, takes the median of the surrounding frames. Removes rain, dust, flicker spikes and things that pass through a locked-off (or stabilised) shot.<br><br>Exact median of 3 or 5 frames. &#x27;frame step&#x27; spaces the samples further apart for slower-moving objects. Optional mask limits it to an area."}
+}
+ BackdropNode {
+  inputs 0
+  name BD_Frames
+  tile_color 0x2f3d4fff
+  label "Frames"
+  note_font_size 24
+  xpos 440
+  ypos 22
+  bdwidth 560
+  bdheight 92
+  z_order 0
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Median_of_3
+  tile_color 0x2f3d4fff
+  label "Median of 3"
+  note_font_size 24
+  xpos 1050
+  ypos 94
+  bdwidth 280
+  bdheight 236
+  z_order 1
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Median_of_5
+  tile_color 0x2f3d4fff
+  label "Median of 5"
+  note_font_size 24
+  xpos 1380
+  ypos 94
+  bdwidth 560
+  bdheight 380
+  z_order 2
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Mask
+  tile_color 0x2f3d4fff
+  label "Mask"
+  note_font_size 24
+  xpos 1990
+  ypos 526
+  bdwidth 280
+  bdheight 164
+  z_order 3
+ }
+ Input {
+  inputs 0
+  name Input1
+  xpos 0
+  ypos 0
+ }
+set N_Input1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Input1_1
+  xpos 34
+  ypos 147
+ }
+set N_Dot_Input1_1 [stack 0]
+push $N_Input1
+ Dot {
+  inputs 1
+  name Dot_Input1_2
+  xpos 34
+  ypos 39
+ }
+set N_Dot_Input1_2 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Input1_2_3
+  xpos 504
+  ypos 39
+ }
+set N_Dot_Dot_Input1_2_3 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Input1_2_3_4
+  xpos 644
+  ypos 39
+ }
+set N_Dot_Dot_Dot_Input1_2_3_4 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Input1_2_3_4_5
+  xpos 784
+  ypos 39
+ }
+set N_Dot_Dot_Dot_Dot_Input1_2_3_4_5 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6
+  xpos 924
+  ypos 39
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6_7
+  xpos 1184
+  ypos 39
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6_7 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6_7_8
+  xpos 1184
+  ypos 147
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6_7_8 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6_7
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6_7_9
+  xpos 1374
+  ypos 39
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6_7_9 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6_7_9_10
+  xpos 1374
+  ypos 255
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6_7_9_10 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6_7_9_10_11
+  xpos 1444
+  ypos 255
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6_7_9_10_11 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6_7_9
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6_7_9_12
+  xpos 1514
+  ypos 39
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6_7_9_12 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6_7_9_12_13
+  xpos 1514
+  ypos 255
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6_7_9_12_13 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6_7_9_12_13_14
+  xpos 1584
+  ypos 255
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6_7_9_12_13_14 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6_7_9_12
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6_7_9_12_15
+  xpos 2194
+  ypos 39
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6_7_9_12_15 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Input1_2_3_4_5
+ TimeOffset {
+  inputs 1
+  time_offset {{-2*parent.step}}
+  name Frame_m2
+  xpos 750
+  ypos 72
+ }
+set N_Frame_m2 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Frame_m2_16
+  xpos 784
+  ypos 111
+ }
+set N_Dot_Frame_m2_16 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Frame_m2_16_17
+  xpos 1724
+  ypos 111
+ }
+set N_Dot_Dot_Frame_m2_16_17 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Frame_m2_16_17_18
+  xpos 1864
+  ypos 111
+ }
+set N_Dot_Dot_Dot_Frame_m2_16_17_18 [stack 0]
+push $N_Dot_Dot_Input1_2_3
+ TimeOffset {
+  inputs 1
+  time_offset {{-1*parent.step}}
+  name Frame_m1
+  xpos 470
+  ypos 72
+ }
+set N_Frame_m1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Frame_m1_19
+  xpos 504
+  ypos 119
+ }
+set N_Dot_Frame_m1_19 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Frame_m1_19_20
+  xpos 1114
+  ypos 119
+ }
+set N_Dot_Dot_Frame_m1_19_20 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Frame_m1_19_20_21
+  xpos 1254
+  ypos 119
+ }
+set N_Dot_Dot_Dot_Frame_m1_19_20_21 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Frame_m1_19_20_21_22
+  xpos 1654
+  ypos 119
+ }
+set N_Dot_Dot_Dot_Dot_Frame_m1_19_20_21_22 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Frame_m1_19_20_21_22_23
+  xpos 1654
+  ypos 147
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Frame_m1_19_20_21_22_23 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Frame_m1_19_20_21_22
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Frame_m1_19_20_21_22_24
+  xpos 1794
+  ypos 119
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Frame_m1_19_20_21_22_24 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Frame_m1_19_20_21_22_24_25
+  xpos 1794
+  ypos 147
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Frame_m1_19_20_21_22_24_25 [stack 0]
+push $N_Dot_Dot_Dot_Input1_2_3_4
+ TimeOffset {
+  inputs 1
+  time_offset {{1*parent.step}}
+  name Frame_p1
+  xpos 610
+  ypos 72
+ }
+set N_Frame_p1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Frame_p1_26
+  xpos 644
+  ypos 219
+ }
+set N_Dot_Frame_p1_26 [stack 0]
+push $N_Frame_p1
+ Dot {
+  inputs 1
+  name Dot_Frame_p1_27
+  xpos 644
+  ypos 103
+ }
+set N_Dot_Frame_p1_27 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Frame_p1_27_28
+  xpos 1444
+  ypos 103
+ }
+set N_Dot_Dot_Frame_p1_27_28 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Frame_p1_27_28_29
+  xpos 1584
+  ypos 103
+ }
+set N_Dot_Dot_Dot_Frame_p1_27_28_29 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6
+ TimeOffset {
+  inputs 1
+  time_offset {{2*parent.step}}
+  name Frame_p2
+  xpos 890
+  ypos 72
+ }
+set N_Frame_p2 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Frame_p2_30
+  xpos 924
+  ypos 127
+ }
+set N_Dot_Frame_p2_30 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Frame_p2_30_31
+  xpos 1386
+  ypos 127
+ }
+set N_Dot_Dot_Frame_p2_30_31 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Frame_p2_30_31_32
+  xpos 1386
+  ypos 147
+ }
+set N_Dot_Dot_Dot_Frame_p2_30_31_32 [stack 0]
+push $N_Dot_Dot_Frame_p2_30_31
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Frame_p2_30_31_33
+  xpos 1526
+  ypos 127
+ }
+set N_Dot_Dot_Dot_Frame_p2_30_31_33 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Frame_p2_30_31_33_34
+  xpos 1526
+  ypos 147
+ }
+set N_Dot_Dot_Dot_Dot_Frame_p2_30_31_33_34 [stack 0]
+push $N_Dot_Input1_1
+push $N_Dot_Dot_Frame_m1_19_20
+ Merge2 {
+  inputs 2
+  operation min
+  name M3_minAB
+  xpos 1080
+  ypos 144
+ }
+set N_M3_minAB [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6_7_8
+push $N_Dot_Dot_Dot_Frame_m1_19_20_21
+ Merge2 {
+  inputs 2
+  operation max
+  name M3_maxAB
+  xpos 1220
+  ypos 144
+ }
+set N_M3_maxAB [stack 0]
+push $N_Dot_Frame_p1_26
+push $N_M3_maxAB
+ Merge2 {
+  inputs 2
+  operation min
+  name M3_minMaxC
+  xpos 1220
+  ypos 216
+ }
+set N_M3_minMaxC [stack 0]
+ Dot {
+  inputs 1
+  name Dot_M3_minMaxC_35
+  xpos 1254
+  ypos 291
+ }
+set N_Dot_M3_minMaxC_35 [stack 0]
+push $N_M3_minAB
+ Merge2 {
+  inputs 2
+  operation max
+  name Median3
+  xpos 1080
+  ypos 288
+ }
+set N_Median3 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Median3_36
+  xpos 1114
+  ypos 327
+ }
+set N_Dot_Median3_36 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Median3_36_37
+  xpos 174
+  ypos 327
+ }
+set N_Dot_Dot_Median3_36_37 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_Frame_m1_19_20_21_22_23
+push $N_Dot_Dot_Frame_m2_16_17
+ Merge2 {
+  inputs 2
+  operation min
+  name M5_minAB
+  xpos 1690
+  ypos 144
+ }
+set N_M5_minAB [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_Frame_m1_19_20_21_22_24_25
+push $N_Dot_Dot_Dot_Frame_m2_16_17_18
+ Merge2 {
+  inputs 2
+  operation max
+  name M5_maxAB
+  xpos 1830
+  ypos 144
+ }
+set N_M5_maxAB [stack 0]
+push $N_Dot_Dot_Dot_Frame_p2_30_31_32
+push $N_Dot_Dot_Frame_p1_27_28
+ Merge2 {
+  inputs 2
+  operation min
+  name M5_minCD
+  xpos 1410
+  ypos 144
+ }
+set N_M5_minCD [stack 0]
+ Dot {
+  inputs 1
+  name Dot_M5_minCD_38
+  xpos 1444
+  ypos 219
+ }
+set N_Dot_M5_minCD_38 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Frame_p2_30_31_33_34
+push $N_Dot_Dot_Dot_Frame_p1_27_28_29
+ Merge2 {
+  inputs 2
+  operation max
+  name M5_maxCD
+  xpos 1550
+  ypos 144
+ }
+set N_M5_maxCD [stack 0]
+ Dot {
+  inputs 1
+  name Dot_M5_maxCD_39
+  xpos 1584
+  ypos 183
+ }
+set N_Dot_M5_maxCD_39 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_M5_maxCD_39_40
+  xpos 1794
+  ypos 183
+ }
+set N_Dot_Dot_M5_maxCD_39_40 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_M5_maxCD_39_40_41
+  xpos 1794
+  ypos 219
+ }
+set N_Dot_Dot_Dot_M5_maxCD_39_40_41 [stack 0]
+push $N_Dot_M5_minCD_38
+push $N_M5_minAB
+ Merge2 {
+  inputs 2
+  operation max
+  name M5_F
+  xpos 1690
+  ypos 216
+ }
+set N_M5_F [stack 0]
+ Dot {
+  inputs 1
+  name Dot_M5_F_42
+  xpos 1724
+  ypos 291
+ }
+set N_Dot_M5_F_42 [stack 0]
+push $N_M5_F
+ Dot {
+  inputs 1
+  name Dot_M5_F_43
+  xpos 1724
+  ypos 255
+ }
+set N_Dot_M5_F_43 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_M5_F_43_44
+  xpos 1526
+  ypos 255
+ }
+set N_Dot_Dot_M5_F_43_44 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_M5_F_43_44_45
+  xpos 1526
+  ypos 291
+ }
+set N_Dot_Dot_Dot_M5_F_43_44_45 [stack 0]
+push $N_Dot_Dot_Dot_M5_maxCD_39_40_41
+push $N_M5_maxAB
+ Merge2 {
+  inputs 2
+  operation min
+  name M5_G
+  xpos 1830
+  ypos 216
+ }
+set N_M5_G [stack 0]
+ Dot {
+  inputs 1
+  name Dot_M5_G_46
+  xpos 1864
+  ypos 363
+ }
+set N_Dot_M5_G_46 [stack 0]
+push $N_Dot_Dot_Dot_M5_F_43_44_45
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6_7_9_10_11
+ Merge2 {
+  inputs 2
+  operation min
+  name M5_minEF
+  xpos 1410
+  ypos 288
+ }
+set N_M5_minEF [stack 0]
+push $N_Dot_M5_F_42
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6_7_9_12_13_14
+ Merge2 {
+  inputs 2
+  operation max
+  name M5_maxEF
+  xpos 1550
+  ypos 288
+ }
+set N_M5_maxEF [stack 0]
+push $N_Dot_M5_G_46
+push $N_M5_maxEF
+ Merge2 {
+  inputs 2
+  operation min
+  name M5_minMaxG
+  xpos 1550
+  ypos 360
+ }
+set N_M5_minMaxG [stack 0]
+ Dot {
+  inputs 1
+  name Dot_M5_minMaxG_47
+  xpos 1584
+  ypos 435
+ }
+set N_Dot_M5_minMaxG_47 [stack 0]
+push $N_M5_minEF
+ Merge2 {
+  inputs 2
+  operation max
+  name Median5
+  xpos 1410
+  ypos 432
+ }
+set N_Median5 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Median5_48
+  xpos 1444
+  ypos 471
+ }
+set N_Dot_Median5_48 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Median5_48_49
+  xpos 244
+  ypos 471
+ }
+set N_Dot_Dot_Median5_48_49 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Median5_48_49_50
+  xpos 244
+  ypos 507
+ }
+set N_Dot_Dot_Dot_Median5_48_49_50 [stack 0]
+push $N_Dot_Dot_Median3_36_37
+ Switch {
+  inputs 2
+  which {{parent.frames}}
+  name FrameCount
+  xpos 140
+  ypos 504
+ }
+set N_FrameCount [stack 0]
+ Dot {
+  inputs 1
+  name Dot_FrameCount_51
+  xpos 174
+  ypos 579
+ }
+set N_Dot_FrameCount_51 [stack 0]
+push $N_FrameCount
+ Dot {
+  inputs 1
+  name Dot_FrameCount_52
+  xpos 174
+  ypos 543
+ }
+set N_Dot_FrameCount_52 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_FrameCount_52_53
+  xpos 2054
+  ypos 543
+ }
+set N_Dot_Dot_FrameCount_52_53 [stack 0]
+ Input {
+  inputs 0
+  number 1
+  name mask
+  xpos 280
+  ypos 504
+ }
+set N_mask [stack 0]
+ Dot {
+  inputs 1
+  name Dot_mask_54
+  xpos 314
+  ypos 579
+ }
+set N_Dot_mask_54 [stack 0]
+push $N_Dot_FrameCount_51
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Input1_2_3_4_5_6_7_9_12_15
+ Keymix {
+  inputs 3
+  name MaskMix
+  xpos 2160
+  ypos 576
+ }
+set N_MaskMix [stack 0]
+ Dot {
+  inputs 1
+  name Dot_MaskMix_55
+  xpos 2194
+  ypos 651
+ }
+set N_Dot_MaskMix_55 [stack 0]
+push $N_Dot_Dot_FrameCount_52_53
+ Switch {
+  inputs 2
+  which {{parent.use_mask}}
+  name MaskSwitch
+  xpos 2020
+  ypos 648
+ }
+set N_MaskSwitch [stack 0]
+ Dot {
+  inputs 1
+  name Dot_MaskSwitch_56
+  xpos 2054
+  ypos 723
+ }
+set N_Dot_MaskSwitch_56 [stack 0]
+push $N_Input1
+ Dissolve {
+  inputs 2
+  which {{parent.mix}}
+  name SleepyMix
+  xpos 0
+  ypos 720
+ }
+set N_SleepyMix [stack 0]
+ Output {
+  inputs 1
+  name Output1
+  xpos 0
+  ypos 792
+ }
+set N_Output1 [stack 0]
+end_group

@@ -1,0 +1,128 @@
+#! C:/Program Files/Nuke13.2v4/nuke-13.2.4.dll -nx
+version 13.2 v4
+Gizmo {
+ tile_color 0x4f7fb5ff
+ inputs 1
+ knobChanged "k = nuke.thisKnob()\nif k.name() == 'inputChange':\n    n = nuke.thisNode()\n    n\['use_input'].setValue(n.input(0) is not None)\n"
+ onCreate "n = nuke.thisNode()\nif not n\['initialised'].value():\n    n\['initialised'].setValue(True)\n    w = n.width()\n    h = n.height()\n    for i, p in enumerate(\[(0, 0), (w, 0), (w, h), (0, h)]):\n        n\['p%d' % (i + 1)].setValue(\[p\[0], p\[1]])\n"
+ help "Four-colour gradient.\n\nFree points: drag the 4 points in the viewer; colours blend by inverse distance (good for filling cleanplates and sky patches).\nCorners: the original bilinear corner gradient.\n\nConnect a plate and press 'Sample colours from plate' to pick the colours under the points."
+ addUserKnob {20 User l "Controls"}
+ addUserKnob {26 sleepy_title l "" +STARTLINE T "<b><font size=\"4\">Grad4Points</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v2.0 &middot; Cleanup</font><br><font color=\"#a8a8a8\">Four-colour gradient from movable points or corners, with plate sampling.</font>"}
+ addUserKnob {26 sleepy_title_div l "" +STARTLINE}
+ addUserKnob {4 mode M {"Free points" "Corners (bilinear)"}}
+ addUserKnob {41 format T Constant2.format}
+ addUserKnob {6 use_input l "use input format" t "Take format and frame range from the connected plate. Ticks itself when you connect that input with the node panel open. Tick it by hand if Nuke did not catch the connection." -STARTLINE}
+ addUserKnob {26 ""}
+ addUserKnob {12 p1 l "point 1"}
+ p1 {0 0}
+ addUserKnob {18 c1 l "colour 1" -STARTLINE}
+ c1 {1 0 0}
+ addUserKnob {12 p2 l "point 2"}
+ p2 {1920 0}
+ addUserKnob {18 c2 l "colour 2" -STARTLINE}
+ c2 {0 1 0}
+ addUserKnob {12 p3 l "point 3"}
+ p3 {1920 1080}
+ addUserKnob {18 c3 l "colour 3" -STARTLINE}
+ c3 {0 0 1}
+ addUserKnob {12 p4 l "point 4"}
+ p4 {0 1080}
+ addUserKnob {18 c4 l "colour 4" -STARTLINE}
+ c4 {0 0 0}
+ addUserKnob {7 power l "falloff power" t "Free points only. Higher = flatter colour around each point and quicker transitions." R 0.5 8}
+ power 2
+ addUserKnob {26 ""}
+ addUserKnob {22 reset_pts l "Points to corners" T "n = nuke.thisNode()\nw = n.width()\nh = n.height()\nfor i, p in enumerate(\[(0, 0), (w, 0), (w, h), (0, h)]):\n    n\['p%d' % (i + 1)].setValue(\[p\[0], p\[1]])\n" +STARTLINE}
+ addUserKnob {22 sample l "Sample colours from plate" -STARTLINE T "n = nuke.thisNode()\nsrc = n.input(0)\nif src is None:\n    nuke.message('Connect a plate to the input first.')\nelse:\n    d = max(1, n\['sample_size'].value())\n    for i in range(1, 5):\n        x, y = n\['p%d' % i].value()\n        x = min(max(x, 0), src.width() - 1)\n        y = min(max(y, 0), src.height() - 1)\n        col = \[src.sample(c, x, y, d, d) for c in ('rgba.red', 'rgba.green', 'rgba.blue')]\n        n\['c%d' % i].setValue(col)\n"}
+ addUserKnob {7 sample_size l "sample size (px)" R 1 50}
+ sample_size 5
+ addUserKnob {6 initialised +INVISIBLE +STARTLINE}
+ addUserKnob {20 sleepy_about l About}
+ addUserKnob {26 sleepy_about_text l "" +STARTLINE T "<b><font size=\"4\">Grad4Points</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v2.0 &middot; Cleanup &middot; SleepyTools</font><br><br><b>Inputs</b><table><tr><td><b>plate</b>&nbsp;&nbsp;</td><td>optional: plate to sample colours and format from</td></tr></table><br><b>How it works</b><br>Four-colour gradient.<br><br>Free points: drag the 4 points in the viewer; colours blend by inverse distance (good for filling cleanplates and sky patches).<br>Corners: the original bilinear corner gradient.<br><br>Connect a plate and press &#x27;Sample colours from plate&#x27; to pick the colours under the points."}
+}
+ BackdropNode {
+  inputs 0
+  name BD_Gradient
+  tile_color 0x2f3d4fff
+  label "Gradient"
+  note_font_size 24
+  xpos 160
+  ypos -50
+  bdwidth 140
+  bdheight 236
+  z_order 0
+ }
+ Input {
+  inputs 0
+  name plate
+  xpos 0
+  ypos 0
+ }
+set N_plate [stack 0]
+ Dot {
+  inputs 1
+  name Dot_plate_1
+  xpos 34
+  ypos 75
+ }
+set N_Dot_plate_1 [stack 0]
+ Constant {
+  inputs 0
+  channels rgba
+  color {0 0 0 1}
+  name Constant2
+  xpos 190
+  ypos 0
+ }
+set N_Constant2 [stack 0]
+push $N_Dot_plate_1
+push $N_Constant2
+ Switch {
+  inputs 2
+  which {{parent.use_input}}
+  name FormatSource
+  xpos 190
+  ypos 72
+ }
+set N_FormatSource [stack 0]
+ Expression {
+  inputs 1
+  temp_name0 w1
+  temp_expr0 "1/max(pow(sqrt((x+0.5-parent.p1.x)*(x+0.5-parent.p1.x)+(y+0.5-parent.p1.y)*(y+0.5-parent.p1.y)),parent.power),1e-6)"
+  temp_name1 w2
+  temp_expr1 "1/max(pow(sqrt((x+0.5-parent.p2.x)*(x+0.5-parent.p2.x)+(y+0.5-parent.p2.y)*(y+0.5-parent.p2.y)),parent.power),1e-6)"
+  temp_name2 w3
+  temp_expr2 "1/max(pow(sqrt((x+0.5-parent.p3.x)*(x+0.5-parent.p3.x)+(y+0.5-parent.p3.y)*(y+0.5-parent.p3.y)),parent.power),1e-6)"
+  temp_name3 w4
+  temp_expr3 "1/max(pow(sqrt((x+0.5-parent.p4.x)*(x+0.5-parent.p4.x)+(y+0.5-parent.p4.y)*(y+0.5-parent.p4.y)),parent.power),1e-6)"
+  expr3 1
+  expr0 "parent.mode==0 ? (w1*parent.c1.r+w2*parent.c2.r+w3*parent.c3.r+w4*parent.c4.r)/(w1+w2+w3+w4) : parent.c1.r*(1-((x+0.5)/width))*(1-((y+0.5)/height))+parent.c2.r*((x+0.5)/width)*(1-((y+0.5)/height))+parent.c3.r*((x+0.5)/width)*((y+0.5)/height)+parent.c4.r*(1-((x+0.5)/width))*((y+0.5)/height)"
+  expr1 "parent.mode==0 ? (w1*parent.c1.g+w2*parent.c2.g+w3*parent.c3.g+w4*parent.c4.g)/(w1+w2+w3+w4) : parent.c1.g*(1-((x+0.5)/width))*(1-((y+0.5)/height))+parent.c2.g*((x+0.5)/width)*(1-((y+0.5)/height))+parent.c3.g*((x+0.5)/width)*((y+0.5)/height)+parent.c4.g*(1-((x+0.5)/width))*((y+0.5)/height)"
+  expr2 "parent.mode==0 ? (w1*parent.c1.b+w2*parent.c2.b+w3*parent.c3.b+w4*parent.c4.b)/(w1+w2+w3+w4) : parent.c1.b*(1-((x+0.5)/width))*(1-((y+0.5)/height))+parent.c2.b*((x+0.5)/width)*(1-((y+0.5)/height))+parent.c3.b*((x+0.5)/width)*((y+0.5)/height)+parent.c4.b*(1-((x+0.5)/width))*((y+0.5)/height)"
+  name Expression2
+  xpos 190
+  ypos 144
+ }
+set N_Expression2 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Expression2_2
+  xpos 224
+  ypos 183
+ }
+set N_Dot_Expression2_2 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Expression2_2_3
+  xpos 34
+  ypos 183
+ }
+set N_Dot_Dot_Expression2_2_3 [stack 0]
+ Output {
+  inputs 1
+  name Output1
+  xpos 0
+  ypos 216
+ }
+set N_Output1 [stack 0]
+end_group

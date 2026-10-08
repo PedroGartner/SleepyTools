@@ -1,0 +1,455 @@
+#! C:/Program Files/Nuke13.2v4/nuke-13.2.4.dll -nx
+version 13.2 v4
+Gizmo {
+ tile_color 0x7d62b8ff
+ inputs 3
+ knobChanged "k = nuke.thisKnob()\nif k.name() == 'inputChange':\n    n = nuke.thisNode()\n    n\['use_mask'].setValue(n.input(2) is not None)\n"
+ addUserKnob {20 options l "Controls"}
+ addUserKnob {26 sleepy_title l "" +STARTLINE T "<b><font size=\"4\">Z Edge Fix</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v2.0 &middot; CG</font><br><font color=\"#a8a8a8\">Extends depth values past the alpha edge so ZDefocus has no halos.</font>"}
+ addUserKnob {26 sleepy_title_div l "" +STARTLINE}
+ addUserKnob {41 from0 l "depth from" t "Channel holding depth on the Z input. rgba.red = old behaviour (depth shuffled into rgb). Pick depth.Z to plug CG in directly." T DepthIn.from0}
+ addUserKnob {7 growedge l "grow edge" t "Grows the outer edge values of the Z pass using an edge extend.\n\nKeep it as low as possible." R 0 20}
+ growedge 1
+ addUserKnob {7 samplearea l "refine sample area" t "Growing the edge can leave small black artifacts around the original edge. Lower this to remove them.\n\nKeep it as close to 0 as possible." R -10 0}
+ samplearea -0.5
+ addUserKnob {26 text_1 l "<b>Mask</b>"}
+ addUserKnob {6 use_mask l "use mask input" t "Ticks itself when you connect that input with the node panel open. Tick it by hand if Nuke did not catch the connection." +STARTLINE}
+ addUserKnob {6 invert t "Masked areas are excluded from the fix by default.\nTick invert to apply the fix only inside the mask." -STARTLINE}
+ addUserKnob {26 text_2 l "<b>Output</b>"}
+ addUserKnob {4 out_mode l "write to" M {"rgb (as before)" "depth.Z of the Z input"}}
+ addUserKnob {20 info l "Info"}
+ addUserKnob {26 _1 l "" +STARTLINE T "Made for single objects. It won't work on a full CG scene\nwith one combined depth channel for everything.\n\n1. Connect the Z input (depth in rgb, or pick depth.Z above)\n2. Connect the alpha input with the CG alpha\n"}
+ addUserKnob {26 text l "" +STARTLINE T "<span style=\"color:#aaa;font-family:sans-serif;font-size:7pt\">node created by <b><span style=\"color:#aaaa00\">Johannes Kretschmer</span></b> - v1.0 2022. v2 changes: depth channel choice, write-back to depth.Z, mask switch."}
+ addUserKnob {20 sleepy_about l About}
+ addUserKnob {26 sleepy_about_text l "" +STARTLINE T "<b><font size=\"4\">Z Edge Fix</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v2.0 &middot; CG &middot; SleepyTools</font><br><br><b>Inputs</b><table><tr><td><b>Z</b>&nbsp;&nbsp;</td><td>depth pass (or CG with depth.Z)</td></tr><tr><td><b>alpha</b>&nbsp;&nbsp;</td><td>CG alpha</td></tr><tr><td><b>mask</b>&nbsp;&nbsp;</td><td>optional: exclude areas</td></tr></table><br><b>How it works</b><br>"}
+}
+ BackdropNode {
+  inputs 0
+  name BD_Mask
+  tile_color 0x3a3150ff
+  label "Mask"
+  note_font_size 24
+  xpos 440
+  ypos 22
+  bdwidth 280
+  bdheight 164
+  z_order 0
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Depth_in
+  tile_color 0x3a3150ff
+  label "Depth in"
+  note_font_size 24
+  xpos 770
+  ypos 22
+  bdwidth 140
+  bdheight 164
+  z_order 1
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Alpha
+  tile_color 0x3a3150ff
+  label "Alpha"
+  note_font_size 24
+  xpos 960
+  ypos 22
+  bdwidth 140
+  bdheight 236
+  z_order 2
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Edge_extend
+  tile_color 0x3a3150ff
+  label "Edge extend"
+  note_font_size 24
+  xpos 1150
+  ypos 166
+  bdwidth 140
+  bdheight 596
+  z_order 3
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Output
+  tile_color 0x3a3150ff
+  label "Output"
+  note_font_size 24
+  xpos 1340
+  ypos 742
+  bdwidth 280
+  bdheight 164
+  z_order 4
+ }
+ Input {
+  inputs 0
+  number 2
+  name mask
+  xpos 140
+  ypos 0
+ }
+set N_mask [stack 0]
+ Dot {
+  inputs 1
+  name Dot_mask_1
+  xpos 174
+  ypos 39
+ }
+set N_Dot_mask_1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_mask_1_2
+  xpos 504
+  ypos 39
+ }
+set N_Dot_Dot_mask_1_2 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_mask_1_2_3
+  xpos 644
+  ypos 39
+ }
+set N_Dot_Dot_Dot_mask_1_2_3 [stack 0]
+ Invert {
+  inputs 1
+  channels alpha
+  name Invert1
+  xpos 610
+  ypos 72
+ }
+set N_Invert1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Invert1_4
+  xpos 644
+  ypos 147
+ }
+set N_Dot_Invert1_4 [stack 0]
+push $N_Dot_Dot_mask_1_2
+ Switch {
+  inputs 2
+  which {{parent.invert}}
+  name Switch1
+  xpos 470
+  ypos 144
+ }
+set N_Switch1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Switch1_5
+  xpos 504
+  ypos 723
+ }
+set N_Dot_Switch1_5 [stack 0]
+ Input {
+  inputs 0
+  name Z
+  xpos 0
+  ypos 0
+ }
+set N_Z [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Z_6
+  xpos 34
+  ypos 47
+ }
+set N_Dot_Z_6 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Z_6_7
+  xpos 834
+  ypos 47
+ }
+set N_Dot_Dot_Z_6_7 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Z_6_7_8
+  xpos 764
+  ypos 47
+ }
+set N_Dot_Dot_Dot_Z_6_7_8 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Z_6_7_8_9
+  xpos 764
+  ypos 75
+ }
+set N_Dot_Dot_Dot_Dot_Z_6_7_8_9 [stack 0]
+push $N_Dot_Dot_Dot_Z_6_7_8
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Z_6_7_8_10
+  xpos 1544
+  ypos 47
+ }
+set N_Dot_Dot_Dot_Dot_Z_6_7_8_10 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Z_6_7_8_9
+push $N_Dot_Dot_Z_6_7
+ Copy {
+  inputs 2
+  from0 rgba.red
+  to0 rgba.red
+  name DepthIn
+  xpos 800
+  ypos 72
+ }
+set N_DepthIn [stack 0]
+ Expression {
+  inputs 1
+  expr0 r
+  expr1 r
+  expr2 r
+  name DepthToRGB
+  xpos 800
+  ypos 144
+ }
+set N_DepthToRGB [stack 0]
+ Dot {
+  inputs 1
+  name Dot_DepthToRGB_11
+  xpos 834
+  ypos 723
+ }
+set N_Dot_DepthToRGB_11 [stack 0]
+push $N_DepthToRGB
+ Dot {
+  inputs 1
+  name Dot_DepthToRGB_12
+  xpos 834
+  ypos 183
+ }
+set N_Dot_DepthToRGB_12 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_DepthToRGB_12_13
+  xpos 1214
+  ypos 183
+ }
+set N_Dot_Dot_DepthToRGB_12_13 [stack 0]
+ Input {
+  inputs 0
+  number 1
+  name alpha
+  xpos 280
+  ypos 0
+ }
+set N_alpha [stack 0]
+ Dot {
+  inputs 1
+  name Dot_alpha_14
+  xpos 314
+  ypos 31
+ }
+set N_Dot_alpha_14 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_alpha_14_15
+  xpos 1024
+  ypos 31
+ }
+set N_Dot_Dot_alpha_14_15 [stack 0]
+ Expression {
+  inputs 1
+  channel0 alpha
+  expr0 "a>0 ? 1 : 0"
+  name BinariseAlpha
+  xpos 990
+  ypos 72
+ }
+set N_BinariseAlpha [stack 0]
+ Dilate {
+  inputs 1
+  channels alpha
+  size {{parent.samplearea}}
+  name Dilate5
+  xpos 990
+  ypos 144
+ }
+set N_Dilate5 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dilate5_16
+  xpos 1024
+  ypos 191
+ }
+set N_Dot_Dilate5_16 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dilate5_16_17
+  xpos 1144
+  ypos 191
+ }
+set N_Dot_Dot_Dilate5_16_17 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dilate5_16_17_18
+  xpos 1144
+  ypos 219
+ }
+set N_Dot_Dot_Dot_Dilate5_16_17_18 [stack 0]
+push $N_Dilate5
+ Dilate {
+  inputs 1
+  channels alpha
+  size {{parent.growedge}}
+  name Dilate6
+  xpos 990
+  ypos 216
+ }
+set N_Dilate6 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dilate6_19
+  xpos 1024
+  ypos 435
+ }
+set N_Dot_Dilate6_19 [stack 0]
+push $N_Dot_Dot_Dot_Dilate5_16_17_18
+push $N_Dot_Dot_DepthToRGB_12_13
+ Copy {
+  inputs 2
+  from0 rgba.alpha
+  to0 rgba.alpha
+  name Copy7
+  xpos 1180
+  ypos 216
+ }
+set N_Copy7 [stack 0]
+ Premult {
+  inputs 1
+  name Premult6
+  xpos 1180
+  ypos 288
+ }
+set N_Premult6 [stack 0]
+ EdgeExtend {
+  inputs 1
+  sourceIsPremultiplied true
+  premultiply false
+  name EdgeExtend3
+  xpos 1180
+  ypos 360
+ }
+set N_EdgeExtend3 [stack 0]
+push $N_Dot_Dilate6_19
+push $N_EdgeExtend3
+ Copy {
+  inputs 2
+  from0 rgba.alpha
+  to0 rgba.alpha
+  name Copy8
+  xpos 1180
+  ypos 432
+ }
+set N_Copy8 [stack 0]
+ Premult {
+  inputs 1
+  name Premult7
+  xpos 1180
+  ypos 504
+ }
+set N_Premult7 [stack 0]
+ Expression {
+  inputs 1
+  expr0 r
+  expr1 r
+  expr2 r
+  name RedToRGB
+  xpos 1180
+  ypos 576
+ }
+set N_RedToRGB [stack 0]
+ Remove {
+  inputs 1
+  channels alpha
+  name Remove3
+  xpos 1180
+  ypos 648
+ }
+set N_Remove3 [stack 0]
+push $N_Dot_Switch1_5
+push $N_Dot_DepthToRGB_11
+push $N_Remove3
+ Keymix {
+  inputs 3
+  channels rgb
+  disable {{!parent.use_mask}}
+  name Keymix1
+  xpos 1180
+  ypos 720
+ }
+set N_Keymix1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Keymix1_20
+  xpos 1214
+  ypos 795
+ }
+set N_Dot_Keymix1_20 [stack 0]
+push $N_Keymix1
+ Dot {
+  inputs 1
+  name Dot_Keymix1_21
+  xpos 1214
+  ypos 759
+ }
+set N_Dot_Keymix1_21 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Keymix1_21_22
+  xpos 1404
+  ypos 759
+ }
+set N_Dot_Dot_Keymix1_21_22 [stack 0]
+push $N_Dot_Keymix1_20
+push $N_Dot_Dot_Dot_Dot_Z_6_7_8_10
+ Copy {
+  inputs 2
+  from0 rgba.red
+  to0 depth.Z
+  name WriteDepth
+  xpos 1510
+  ypos 792
+ }
+set N_WriteDepth [stack 0]
+ Dot {
+  inputs 1
+  name Dot_WriteDepth_23
+  xpos 1544
+  ypos 867
+ }
+set N_Dot_WriteDepth_23 [stack 0]
+push $N_Dot_Dot_Keymix1_21_22
+ Switch {
+  inputs 2
+  which {{parent.out_mode}}
+  name OutMode
+  xpos 1370
+  ypos 864
+ }
+set N_OutMode [stack 0]
+ Dot {
+  inputs 1
+  name Dot_OutMode_24
+  xpos 1404
+  ypos 903
+ }
+set N_Dot_OutMode_24 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_OutMode_24_25
+  xpos 34
+  ypos 903
+ }
+set N_Dot_Dot_OutMode_24_25 [stack 0]
+ Output {
+  inputs 1
+  name Output1
+  xpos 0
+  ypos 936
+ }
+set N_Output1 [stack 0]
+end_group

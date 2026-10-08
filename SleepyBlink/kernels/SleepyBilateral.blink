@@ -1,0 +1,43 @@
+kernel SleepyBilateral : ImageComputationKernel<ePixelWise>
+{
+  Image<eRead, eAccessRanged2D, eEdgeClamped> src;
+  Image<eWrite> dst;
+
+param:
+  int radius;
+  float sigmaSpace;
+  float sigmaRange;
+
+local:
+  int r;
+
+  void define() {
+    defineParam(radius, "radius", 6);
+    defineParam(sigmaSpace, "sigmaSpace", 3.0f);
+    defineParam(sigmaRange, "sigmaRange", 0.1f);
+  }
+
+  void init() {
+    r = clamp(radius, 1, 32);
+    src.setRange(-r, -r, r, r);
+  }
+
+  // edge-preserving blur: neighbours count less the further they are in space and in colour
+  void process(int2 pos) {
+    SampleType(src) c = src(0, 0);
+    float ss = 2.0f * max(sigmaSpace * sigmaSpace, 1e-4f);
+    float sr = 2.0f * max(sigmaRange * sigmaRange, 1e-8f);
+    float4 sum = float4(0.0f);
+    float wsum = 0.0f;
+    for (int j = -r; j <= r; j++) {
+      for (int i = -r; i <= r; i++) {
+        SampleType(src) p = src(i, j);
+        float3 d = float3(p.x - c.x, p.y - c.y, p.z - c.z);
+        float w = exp(-(float)(i * i + j * j) / ss - dot(d, d) / sr);
+        sum += float4(p.x, p.y, p.z, p.w) * w;
+        wsum += w;
+      }
+    }
+    dst() = sum / max(wsum, 1e-8f);
+  }
+};

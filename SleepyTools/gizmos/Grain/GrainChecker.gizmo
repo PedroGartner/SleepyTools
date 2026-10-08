@@ -1,0 +1,278 @@
+#! C:/Program Files/Nuke13.2v4/nuke-13.2.4.dll -nx
+version 13.2 v4
+Gizmo {
+ tile_color 0x9a7a4fff
+ inputs 2
+ knobChanged "k = nuke.thisKnob()\nif k.name() == 'inputChange':\n    n = nuke.thisNode()\n    n\['compare'].setValue(n.input(1) is not None)\n"
+ help "Shows the grain (high-pass) of the image. v2: centred display so negative grain is visible, channel isolation, optional plate input for a plate / comp split."
+ addUserKnob {20 User l "Controls"}
+ addUserKnob {26 sleepy_title l "" +STARTLINE T "<b><font size=\"4\">GrainChecker</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v2.0 &middot; Grain</font><br><font color=\"#a8a8a8\">Shows the grain (high-pass), with an optional plate / comp split.</font>"}
+ addUserKnob {26 sleepy_title_div l "" +STARTLINE}
+ addUserKnob {7 adjustgrain l "Adjust Grain Visibility" t "Gain applied to the grain for viewing." R 0 50}
+ adjustgrain 10
+ addUserKnob {7 grain_size l "grain size" t "Blur used to separate grain from image detail." R 0.5 5}
+ grain_size 2
+ addUserKnob {6 use_log l "measure in log" t "Converts to log first so shadow and highlight grain read at similar strength." +STARTLINE}
+ use_log true
+ addUserKnob {4 display M {"centred (grey = no grain)" absolute}}
+ addUserKnob {4 channel M {RGB Red Green Blue}}
+ addUserKnob {26 cmp l "<b>Compare</b>"}
+ addUserKnob {6 compare l "split plate / comp" t "Left of the split: plate input. Right: this node's main input. Ticks itself when you connect that input with the node panel open. Tick it by hand if Nuke did not catch the connection." +STARTLINE}
+ addUserKnob {7 split l "split position"}
+ split 0.5
+ addUserKnob {20 sleepy_about l About}
+ addUserKnob {26 sleepy_about_text l "" +STARTLINE T "<b><font size=\"4\">GrainChecker</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v2.0 &middot; Grain &middot; SleepyTools</font><br><br><b>Inputs</b><table><tr><td><b>Input1</b>&nbsp;&nbsp;</td><td>image to check</td></tr><tr><td><b>plate</b>&nbsp;&nbsp;</td><td>optional: plate for the split view</td></tr></table><br><b>How it works</b><br>Shows the grain (high-pass) of the image. v2: centred display so negative grain is visible, channel isolation, optional plate input for a plate / comp split."}
+}
+ BackdropNode {
+  inputs 0
+  name BD_Plate_grain
+  tile_color 0x4a3f30ff
+  label "Plate grain"
+  note_font_size 24
+  xpos 300
+  ypos 22
+  bdwidth 140
+  bdheight 236
+  z_order 0
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Comp_grain
+  tile_color 0x4a3f30ff
+  label "Comp grain"
+  note_font_size 24
+  xpos 490
+  ypos 22
+  bdwidth 140
+  bdheight 236
+  z_order 1
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Display
+  tile_color 0x4a3f30ff
+  label "Display"
+  note_font_size 24
+  xpos 680
+  ypos 238
+  bdwidth 140
+  bdheight 164
+  z_order 2
+ }
+ Input {
+  inputs 0
+  number 1
+  name plate
+  xpos 140
+  ypos 0
+ }
+set N_plate [stack 0]
+ Dot {
+  inputs 1
+  name Dot_plate_1
+  xpos 174
+  ypos 39
+ }
+set N_Dot_plate_1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_plate_1_2
+  xpos 364
+  ypos 39
+ }
+set N_Dot_Dot_plate_1_2 [stack 0]
+ Log2Lin {
+  inputs 1
+  operation lin2log
+  disable {{!parent.use_log}}
+  name Log_plate
+  xpos 330
+  ypos 72
+ }
+set N_Log_plate [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Log_plate_3
+  xpos 364
+  ypos 111
+ }
+set N_Dot_Log_plate_3 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Log_plate_3_4
+  xpos 434
+  ypos 111
+ }
+set N_Dot_Dot_Log_plate_3_4 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Log_plate_3_4_5
+  xpos 434
+  ypos 219
+ }
+set N_Dot_Dot_Dot_Log_plate_3_4_5 [stack 0]
+push $N_Log_plate
+ Blur {
+  inputs 1
+  channels rgb
+  size {{parent.grain_size}}
+  name Blur_plate
+  xpos 330
+  ypos 144
+ }
+set N_Blur_plate [stack 0]
+push $N_Dot_Dot_Dot_Log_plate_3_4_5
+push $N_Blur_plate
+ Merge2 {
+  inputs 2
+  operation minus
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name HighPass_plate
+  xpos 330
+  ypos 216
+ }
+set N_HighPass_plate [stack 0]
+ Dot {
+  inputs 1
+  name Dot_HighPass_plate_6
+  xpos 364
+  ypos 291
+ }
+set N_Dot_HighPass_plate_6 [stack 0]
+ Input {
+  inputs 0
+  number 0
+  name Input1
+  xpos 0
+  ypos 0
+ }
+set N_Input1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Input1_7
+  xpos 34
+  ypos 47
+ }
+set N_Dot_Input1_7 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Input1_7_8
+  xpos 554
+  ypos 47
+ }
+set N_Dot_Dot_Input1_7_8 [stack 0]
+ Log2Lin {
+  inputs 1
+  operation lin2log
+  disable {{!parent.use_log}}
+  name Log_comp
+  xpos 520
+  ypos 72
+ }
+set N_Log_comp [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Log_comp_9
+  xpos 554
+  ypos 111
+ }
+set N_Dot_Log_comp_9 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Log_comp_9_10
+  xpos 624
+  ypos 111
+ }
+set N_Dot_Dot_Log_comp_9_10 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Log_comp_9_10_11
+  xpos 624
+  ypos 219
+ }
+set N_Dot_Dot_Dot_Log_comp_9_10_11 [stack 0]
+push $N_Log_comp
+ Blur {
+  inputs 1
+  channels rgb
+  size {{parent.grain_size}}
+  name Blur_comp
+  xpos 520
+  ypos 144
+ }
+set N_Blur_comp [stack 0]
+push $N_Dot_Dot_Dot_Log_comp_9_10_11
+push $N_Blur_comp
+ Merge2 {
+  inputs 2
+  operation minus
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name HighPass_comp
+  xpos 520
+  ypos 216
+ }
+set N_HighPass_comp [stack 0]
+ Dot {
+  inputs 1
+  name Dot_HighPass_comp_12
+  xpos 554
+  ypos 255
+ }
+set N_Dot_HighPass_comp_12 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_HighPass_comp_12_13
+  xpos 744
+  ypos 255
+ }
+set N_Dot_Dot_HighPass_comp_12_13 [stack 0]
+push $N_Dot_HighPass_plate_6
+push $N_Dot_Dot_HighPass_comp_12_13
+ MergeExpression {
+  inputs 2
+  expr0 "abs(x+0.5-width*parent.split)<1.5 ? 1 : (x+0.5<width*parent.split ? Ar : Br)"
+  expr1 "abs(x+0.5-width*parent.split)<1.5 ? 1 : (x+0.5<width*parent.split ? Ag : Bg)"
+  expr2 "abs(x+0.5-width*parent.split)<1.5 ? 1 : (x+0.5<width*parent.split ? Ab : Bb)"
+  expr3 Ba
+  disable {{!parent.compare}}
+  name Split
+  xpos 710
+  ypos 288
+ }
+set N_Split [stack 0]
+ Expression {
+  inputs 1
+  expr0 "(parent.display==0 ? (parent.channel==0 ? r : (parent.channel==1 ? r : parent.channel==2 ? g : b))*parent.adjustgrain+0.5 : abs(parent.channel==0 ? r : (parent.channel==1 ? r : parent.channel==2 ? g : b))*parent.adjustgrain)"
+  expr1 "(parent.display==0 ? (parent.channel==0 ? g : (parent.channel==1 ? r : parent.channel==2 ? g : b))*parent.adjustgrain+0.5 : abs(parent.channel==0 ? g : (parent.channel==1 ? r : parent.channel==2 ? g : b))*parent.adjustgrain)"
+  expr2 "(parent.display==0 ? (parent.channel==0 ? b : (parent.channel==1 ? r : parent.channel==2 ? g : b))*parent.adjustgrain+0.5 : abs(parent.channel==0 ? b : (parent.channel==1 ? r : parent.channel==2 ? g : b))*parent.adjustgrain)"
+  name Display
+  xpos 710
+  ypos 360
+ }
+set N_Display [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Display_14
+  xpos 744
+  ypos 399
+ }
+set N_Dot_Display_14 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Display_14_15
+  xpos 34
+  ypos 399
+ }
+set N_Dot_Dot_Display_14_15 [stack 0]
+ Output {
+  inputs 1
+  name Output2
+  xpos 0
+  ypos 432
+ }
+set N_Output2 [stack 0]
+end_group

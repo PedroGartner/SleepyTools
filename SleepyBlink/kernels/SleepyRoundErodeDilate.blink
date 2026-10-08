@@ -1,0 +1,44 @@
+kernel SleepyRoundErodeDilate : ImageComputationKernel<ePixelWise>
+{
+  Image<eRead, eAccessRanged2D, eEdgeClamped> src;
+  Image<eWrite> dst;
+
+param:
+  float size;
+  bool alphaOnly;
+
+local:
+  int r;
+
+  void define() {
+    defineParam(size, "size", 4.0f);
+    defineParam(alphaOnly, "alphaOnly", true);
+  }
+
+  void init() {
+    r = clamp((int)ceil(fabs(size)), 1, 64);
+    src.setRange(-r, -r, r, r);
+  }
+
+  // round-shaped min (erode, size < 0) or max (dilate, size > 0) with sub-pixel radius,
+  // so mattes grow and shrink as circles instead of squares
+  void process(int2 pos) {
+    SampleType(src) c = src(0, 0);
+    bool grow = size > 0.0f;
+    float rad = fabs(size);
+    float4 acc = c;
+    for (int j = -r; j <= r; j++) {
+      for (int i = -r; i <= r; i++) {
+        float d = sqrt((float)(i * i + j * j));
+        float cover = clamp(rad + 0.5f - d, 0.0f, 1.0f);
+        if (cover <= 0.0f) continue;
+        SampleType(src) p = src(i, j);
+        float4 q = float4(p.x, p.y, p.z, p.w);
+        float4 v = c + (q - c) * cover;
+        acc = grow ? max(acc, v) : min(acc, v);
+      }
+    }
+    if (alphaOnly) dst() = float4(c.x, c.y, c.z, acc.w);
+    else dst() = acc;
+  }
+};

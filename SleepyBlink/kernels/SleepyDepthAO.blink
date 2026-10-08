@@ -1,0 +1,72 @@
+kernel SleepyDepthAO : ImageComputationKernel<ePixelWise>
+{
+  Image<eRead, eAccessRanged2D, eEdgeClamped> src;
+  Image<eWrite> dst;
+
+param:
+  int radius;
+  float range;
+  float bias;
+  float strength;
+  int channel;
+  bool inverseDepth;
+
+local:
+  int r;
+
+  void define() {
+    defineParam(radius, "radius", 24);
+    defineParam(range, "range", 1.0f);
+    defineParam(bias, "bias", 0.02f);
+    defineParam(strength, "strength", 1.0f);
+    defineParam(channel, "channel", 0);
+    defineParam(inverseDepth, "inverseDepth", false);
+  }
+
+  void init() {
+    r = clamp(radius, 2, 128);
+    src.setRange(-r, -r, r, r);
+  }
+
+  // distance to camera at an offset; 0 (empty) counts as far away
+  float depth(int dx, int dy) {
+    SampleType(src) p = src(dx, dy);
+    float d = p.x;
+    if (channel == 1) d = p.y;
+    if (channel == 2) d = p.z;
+    if (channel == 3) d = p.w;
+    if (inverseDepth) d = d > 0.0f ? 1.0f / d : 1e6f;
+    else if (d <= 0.0f) d = 1e6f;
+    return d;
+  }
+
+  // screen-space ambient occlusion from depth alone. Each direction samples a pair of opposite
+  // neighbours: on a flat or tilted plane their average equals this pixel's depth, so only real
+  // creases and corners (both sides closer) occlude. Differences much larger than 'range' are
+  // ignored so foreground objects don't darken the background behind them.
+  void process(int2 pos) {
+    float d0 = depth(0, 0);
+    float occ = 0.0f;
+    float total = 0.0f;
+    float jitter = 0.35f * (float)((pos.x * 7 + pos.y * 13) % 4);
+    for (int a = 0; a < 8; a++) {
+      float ang = a * 0.3926991f + jitter;
+      float cs = cos(ang);
+      float sn = sin(ang);
+      for (int st = 1; st <= 4; st++) {
+        float t = st / 4.0f;
+        int dx = (int)floor(cs * r * t + 0.5f);
+        int dy = (int)floor(sn * r * t + 0.5f);
+        float d1 = depth(dx, dy);
+        float d2 = depth(-dx, -dy);
+        float diff = d0 - 0.5f * (d1 + d2);
+        float near = d0 - min(d1, d2);
+        float w = 1.0f - t * 0.5f;
+        if (diff > bias && near < range * 2.0f) occ += w * clamp(diff / range, 0.0f, 1.0f);
+        total += w;
+      }
+    }
+    float ao = clamp(1.0f - strength * 2.0f * occ / total, 0.0f, 1.0f);
+    dst() = float4(ao, ao, ao, 1.0f);
+  }
+};

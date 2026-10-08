@@ -1,0 +1,204 @@
+#! C:/Program Files/Nuke13.2v4/nuke-13.2.4.dll -nx
+version 13.2 v4
+Gizmo {
+ tile_color 0x9a7a4fff
+ help "Synthetic per-channel grain.\n\nTo match a plate: find a flat area, blur a copy to remove its grain, feed that in and wipe against the original. Match red, green and blue separately.\n\nv2: Seed and Black now work, grain animates per frame (untick 'animate grain' for a frozen pattern), Reset restores the real defaults."
+ mapsize {0.15 0.15}
+ addUserKnob {20 master_control l "Controls"}
+ addUserKnob {26 sleepy_title l "" +STARTLINE T "<b><font size=\"4\">StaticNoise</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v2.0 &middot; Grain</font><br><font color=\"#a8a8a8\">Synthetic per-channel grain with seed, animation and shadow grain.</font>"}
+ addUserKnob {26 sleepy_title_div l "" +STARTLINE}
+ addUserKnob {7 noise_intensity_global l Intensity R 0 2}
+ noise_intensity_global 0.7
+ addUserKnob {7 rgb_size_multiplier l Size R 0 2}
+ rgb_size_multiplier 1
+ addUserKnob {3 seed l Seed t "Changes the grain pattern."}
+ seed 134
+ addUserKnob {6 animate l "animate grain" t "On: new grain every frame (film grain).\nOff: frozen pattern." -STARTLINE}
+ animate true
+ addUserKnob {26 ""}
+ addUserKnob {6 no_alpha l "ignore alpha" t "On: grain everywhere.\nOff: grain only where the input has alpha." +STARTLINE}
+ no_alpha true
+ addUserKnob {26 sleepy_mix_div l "" +STARTLINE}
+ addUserKnob {7 mix t "Blend between the untouched input (0) and the result (1)."}
+ mix 1
+ addUserKnob {20 adv_controls l "Advanced"}
+ addUserKnob {20 fractal_noise_size l "RGB Noise Size" n 1}
+ fractal_noise_size 0
+ addUserKnob {14 red_size l r R 0 100}
+ red_size 1.7
+ addUserKnob {14 green_size l g R 0 100}
+ green_size 1.6
+ addUserKnob {14 blue_size l b R 0 100}
+ blue_size 1.5
+ addUserKnob {20 endGroup n -1}
+ addUserKnob {20 noise_irregularity l "RGB Noise Irregularity" n 1}
+ noise_irregularity 0
+ addUserKnob {7 red_i l r}
+ red_i 1
+ addUserKnob {7 green_i l g}
+ green_i 0.75
+ addUserKnob {7 blue_i l b}
+ blue_i 0.65
+ addUserKnob {20 endGroup_1 l endGroup n -1}
+ addUserKnob {20 noise_intensity l "RGB Noise Intensity" n 1}
+ noise_intensity 0
+ addUserKnob {7 red_m l r t "Grain added to a white pixel."}
+ red_m 0.4
+ addUserKnob {7 green_m l g}
+ green_m 0.6
+ addUserKnob {7 blue_m l b}
+ blue_m 1.65
+ addUserKnob {18 black t "Grain added everywhere regardless of brightness. Raise it to get grain in the shadows."}
+ black {0 0 0}
+ addUserKnob {18 minimum t "Output never goes below this value." R 0 0.01}
+ minimum {0 0 0}
+ addUserKnob {20 endGroup_2 l endGroup n -1}
+ addUserKnob {26 ""}
+ addUserKnob {22 reset l "Reset to defaults" T "n = nuke.thisNode()\ndefaults = \[\n    ('noise_intensity_global', 0.7), ('rgb_size_multiplier', 1.0), ('seed', 134),\n    ('red_size', 1.7), ('green_size', 1.6), ('blue_size', 1.5),\n    ('red_i', 1.0), ('green_i', 0.75), ('blue_i', 0.65),\n    ('red_m', 0.4), ('green_m', 0.6), ('blue_m', 1.65),\n    ('black', 0.0), ('minimum', 0.0),\n]\nfor name, value in defaults:\n    n\[name].setValue(value)\n" +STARTLINE}
+ addUserKnob {20 sleepy_about l About}
+ addUserKnob {26 sleepy_about_text l "" +STARTLINE T "<b><font size=\"4\">StaticNoise</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v2.0 &middot; Grain &middot; SleepyTools</font><br><br><b>Inputs</b><table><tr><td><b>Input1</b>&nbsp;&nbsp;</td><td>image to grain</td></tr></table><br><b>How it works</b><br>Synthetic per-channel grain.<br><br>To match a plate: find a flat area, blur a copy to remove its grain, feed that in and wipe against the original. Match red, green and blue separately.<br><br>v2: Seed and Black now work, grain animates per frame (untick &#x27;animate grain&#x27; for a frozen pattern), Reset restores the real defaults."}
+}
+ BackdropNode {
+  inputs 0
+  name BD_Noise
+  tile_color 0x4a3f30ff
+  label "Noise"
+  note_font_size 24
+  xpos 160
+  ypos 22
+  bdwidth 140
+  bdheight 236
+  z_order 0
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Apply
+  tile_color 0x4a3f30ff
+  label "Apply"
+  note_font_size 24
+  xpos 350
+  ypos 238
+  bdwidth 140
+  bdheight 92
+  z_order 1
+ }
+ Input {
+  inputs 0
+  name Input1
+  xpos 0
+  ypos 0
+ }
+set N_Input1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Input1_1
+  xpos 34
+  ypos 39
+ }
+set N_Dot_Input1_1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Input1_1_2
+  xpos 224
+  ypos 39
+ }
+set N_Dot_Dot_Input1_1_2 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Input1_1_2_3
+  xpos 414
+  ypos 39
+ }
+set N_Dot_Dot_Dot_Input1_1_2_3 [stack 0]
+push $N_Dot_Dot_Input1_1_2
+ Noise {
+  inputs 1
+  output {rgba.red -rgba.green -rgba.blue -rgba.alpha}
+  cliptype none
+  replace true
+  size {{parent.red_size.w*parent.rgb_size_multiplier} {parent.red_size.h*parent.rgb_size_multiplier}}
+  zoffset {{"(parent.animate ? frame : 0) + parent.seed*1.37 + 0"}}
+  octaves 2
+  gamma 1
+  xrotate {{parent.red_i*45}}
+  yrotate {{parent.red_i*45}}
+  name red
+  xpos 190
+  ypos 72
+ }
+set N_red [stack 0]
+ Noise {
+  inputs 1
+  output {-rgba.red rgba.green -rgba.blue -rgba.alpha}
+  cliptype none
+  replace true
+  size {{parent.green_size.w*parent.rgb_size_multiplier} {parent.green_size.h*parent.rgb_size_multiplier}}
+  zoffset {{"(parent.animate ? frame : 0) + parent.seed*1.37 + 10.5"}}
+  octaves 2
+  gamma 1
+  xrotate {{parent.green_i*45}}
+  yrotate {{parent.green_i*45}}
+  name green
+  xpos 190
+  ypos 144
+ }
+set N_green [stack 0]
+ Noise {
+  inputs 1
+  output {-rgba.red -rgba.green rgba.blue -rgba.alpha}
+  cliptype none
+  replace true
+  size {{parent.blue_size.w*parent.rgb_size_multiplier} {parent.blue_size.h*parent.rgb_size_multiplier}}
+  zoffset {{"(parent.animate ? frame : 0) + parent.seed*1.37 + 21"}}
+  octaves 2
+  gamma 1
+  xrotate {{parent.blue_i*45}}
+  yrotate {{parent.blue_i*45}}
+  name blue
+  xpos 190
+  ypos 216
+ }
+set N_blue [stack 0]
+ Dot {
+  inputs 1
+  name Dot_blue_4
+  xpos 224
+  ypos 291
+ }
+set N_Dot_blue_4 [stack 0]
+push $N_Dot_Dot_Dot_Input1_1_2_3
+ MergeExpression {
+  inputs 2
+  expr0 "max(parent.minimum.r, Br + (2*Ar-1)*(Br*parent.red_m + parent.black.r)*parent.noise_intensity_global*(parent.no_alpha ? 1 : clamp(Ba)))"
+  expr1 "max(parent.minimum.g, Bg + (2*Ag-1)*(Bg*parent.green_m + parent.black.g)*parent.noise_intensity_global*(parent.no_alpha ? 1 : clamp(Ba)))"
+  expr2 "max(parent.minimum.b, Bb + (2*Ab-1)*(Bb*parent.blue_m + parent.black.b)*parent.noise_intensity_global*(parent.no_alpha ? 1 : clamp(Ba)))"
+  expr3 Ba
+  name MergeExpression1
+  xpos 380
+  ypos 288
+ }
+set N_MergeExpression1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_MergeExpression1_5
+  xpos 414
+  ypos 363
+ }
+set N_Dot_MergeExpression1_5 [stack 0]
+push $N_Input1
+ Dissolve {
+  inputs 2
+  which {{parent.mix}}
+  name SleepyMix
+  xpos 0
+  ypos 360
+ }
+set N_SleepyMix [stack 0]
+ Output {
+  inputs 1
+  name Output1
+  xpos 0
+  ypos 432
+ }
+set N_Output1 [stack 0]
+end_group

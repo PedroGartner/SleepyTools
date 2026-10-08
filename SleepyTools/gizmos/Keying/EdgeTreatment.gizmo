@@ -1,0 +1,287 @@
+#! C:/Program Files/Nuke13.2v4/nuke-13.2.4.dll -nx
+version 13.2 v4
+Gizmo {
+ tile_color 0x3f9e5aff
+ inputs 2
+ knobChanged "k = nuke.thisKnob()\nif k.name() == 'inputChange':\n    n = nuke.thisNode()\n    n\['use_mask'].setValue(n.input(1) is not None)\n"
+ help "Edge despill with luminance restore.\n\nKeylight removes the screen spill from SOURCE (despill only, no premultiply). The brightness that the despill took away is added back as neutral (or tinted) light, so edges don't go dark or grey. Connect MASK to limit it to an edge region; without a mask it works on the whole frame.\n\nv2: rebuilt; the old version went black inside the mask because Keylight's Final Result is premultiplied."
+ addUserKnob {20 despill l "Controls"}
+ addUserKnob {26 sleepy_title l "" +STARTLINE T "<b><font size=\"4\">EdgeTreatment</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v2.0 &middot; Keying</font><br><font color=\"#a8a8a8\">Edge despill with luminance restore, optionally limited to an edge mask.</font>"}
+ addUserKnob {26 sleepy_title_div l "" +STARTLINE}
+ addUserKnob {41 screenColour l "Screen Colour" T Keylight5.screenColour}
+ addUserKnob {41 screenGain l "Screen Gain" T Keylight5.screenGain}
+ addUserKnob {41 screenBalance l "Screen Balance" T Keylight5.screenBalance}
+ addUserKnob {41 despillBias l "Despill Bias" T Keylight5.despillBias}
+ addUserKnob {26 ""}
+ addUserKnob {7 restore l "restore luminance" t "How much of the brightness removed by the despill is added back." R 0 2}
+ restore 1
+ addUserKnob {18 restore_colour l "restore colour" t "Tint of the restored light. Pick the background colour for a light-wrap feel."}
+ restore_colour {1 1 1}
+ addUserKnob {26 ""}
+ addUserKnob {6 use_mask l "use mask input" t "Ticks itself when you connect that input with the node panel open. Tick it by hand if Nuke did not catch the connection." +STARTLINE}
+ addUserKnob {4 view M {Result "Removed spill"}}
+ addUserKnob {26 sleepy_mix_div l "" +STARTLINE}
+ addUserKnob {7 mix t "Blend between the untouched input (0) and the result (1)."}
+ mix 1
+ addUserKnob {20 sleepy_about l About}
+ addUserKnob {26 sleepy_about_text l "" +STARTLINE T "<b><font size=\"4\">EdgeTreatment</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v2.0 &middot; Keying &middot; SleepyTools</font><br><br><b>Inputs</b><table><tr><td><b>SOURCE</b>&nbsp;&nbsp;</td><td>plate / keyed element</td></tr><tr><td><b>MASK</b>&nbsp;&nbsp;</td><td>optional: edge region</td></tr></table><br><b>How it works</b><br>Edge despill with luminance restore.<br><br>Keylight removes the screen spill from SOURCE (despill only, no premultiply). The brightness that the despill took away is added back as neutral (or tinted) light, so edges don&#x27;t go dark or grey. Connect MASK to limit it to an edge region; without a mask it works on the whole frame.<br><br>v2: rebuilt; the old version went black inside the mask because Keylight&#x27;s Final Result is premultiplied."}
+}
+ BackdropNode {
+  inputs 0
+  name BD_Despill
+  tile_color 0x2f4a36ff
+  label "Despill"
+  note_font_size 24
+  xpos 300
+  ypos 22
+  bdwidth 280
+  bdheight 164
+  z_order 0
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Restore
+  tile_color 0x2f4a36ff
+  label "Restore"
+  note_font_size 24
+  xpos 630
+  ypos 94
+  bdwidth 280
+  bdheight 236
+  z_order 1
+ }
+ Input {
+  inputs 0
+  name SOURCE
+  xpos 0
+  ypos 0
+ }
+set N_SOURCE [stack 0]
+ Dot {
+  inputs 1
+  name Dot_SOURCE_1
+  xpos 34
+  ypos 39
+ }
+set N_Dot_SOURCE_1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_SOURCE_1_2
+  xpos 364
+  ypos 39
+ }
+set N_Dot_Dot_SOURCE_1_2 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_SOURCE_1_2_3
+  xpos 504
+  ypos 39
+ }
+set N_Dot_Dot_Dot_SOURCE_1_2_3 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_SOURCE_1_2_3_4
+  xpos 694
+  ypos 39
+ }
+set N_Dot_Dot_Dot_Dot_SOURCE_1_2_3_4 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_SOURCE_1_2_3_4_5
+  xpos 834
+  ypos 39
+ }
+set N_Dot_Dot_Dot_Dot_Dot_SOURCE_1_2_3_4_5 [stack 0]
+push $N_Dot_Dot_Dot_SOURCE_1_2_3
+ OFXuk.co.thefoundry.keylight.keylight_v201 {
+  inputs 1
+  show "Intermediate Result"
+  unPreMultiply false
+  screenColour {0.1 0.6 0.15}
+  screenGain 1
+  screenBalance 0.5
+  alphaBias {0.05427400023 0.02726599947 0.01625199988}
+  despillBias {0.5 0.5 0.5}
+  gangBiases false
+  preBlur 0
+  "Screen Matte" 0
+  screenClipMin 0
+  screenClipMax 1
+  screenClipRollback 0
+  screenGrowShrink 0
+  screenSoftness 0
+  screenDespotBlack 0
+  screenDespotWhite 0
+  screenReplaceMethod "Soft Colour"
+  screenReplaceColour {0.5 0.5 0.5}
+  Tuning 0
+  midPoint 0.5
+  lowGain 1
+  midGain 1
+  highGain 1
+  "Inside Mask" 0
+  sourceAlphaHandling Ignore
+  insideReplaceMethod "Soft Colour"
+  insideReplaceColour {0.5 0.5 0.5}
+  Crops 0
+  SourceXMethod Colour
+  SourceYMethod Colour
+  SourceEdgeColour 0
+  SourceCropL 0
+  SourceCropR 1
+  SourceCropB 0
+  SourceCropT 1
+  balanceSet true
+  insideComponent None
+  outsideComponent None
+  cacheBreaker true
+  name Keylight5
+  xpos 470
+  ypos 72
+ }
+set N_Keylight5 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Keylight5_6
+  xpos 504
+  ypos 147
+ }
+set N_Dot_Keylight5_6 [stack 0]
+push $N_Keylight5
+ Dot {
+  inputs 1
+  name Dot_Keylight5_7
+  xpos 504
+  ypos 111
+ }
+set N_Dot_Keylight5_7 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Keylight5_7_8
+  xpos 764
+  ypos 111
+ }
+set N_Dot_Dot_Keylight5_7_8 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Keylight5_7_8_9
+  xpos 764
+  ypos 147
+ }
+set N_Dot_Dot_Dot_Keylight5_7_8_9 [stack 0]
+push $N_Dot_Keylight5_6
+push $N_Dot_Dot_SOURCE_1_2
+ MergeExpression {
+  inputs 2
+  expr0 "Br-Ar"
+  expr1 "Bg-Ag"
+  expr2 "Bb-Ab"
+  expr3 Ba
+  name SpillView
+  xpos 330
+  ypos 144
+ }
+set N_SpillView [stack 0]
+ Dot {
+  inputs 1
+  name Dot_SpillView_10
+  xpos 364
+  ypos 435
+ }
+set N_Dot_SpillView_10 [stack 0]
+push $N_Dot_Dot_Dot_Keylight5_7_8_9
+push $N_Dot_Dot_Dot_Dot_Dot_SOURCE_1_2_3_4_5
+ MergeExpression {
+  inputs 2
+  expr0 "Ar+max(0, 0.2126*(Br-Ar)+0.7152*(Bg-Ag)+0.0722*(Bb-Ab))*parent.restore*parent.restore_colour.r"
+  expr1 "Ag+max(0, 0.2126*(Br-Ar)+0.7152*(Bg-Ag)+0.0722*(Bb-Ab))*parent.restore*parent.restore_colour.g"
+  expr2 "Ab+max(0, 0.2126*(Br-Ar)+0.7152*(Bg-Ag)+0.0722*(Bb-Ab))*parent.restore*parent.restore_colour.b"
+  expr3 Ba
+  name Restore
+  xpos 800
+  ypos 144
+ }
+set N_Restore [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Restore_11
+  xpos 834
+  ypos 219
+ }
+set N_Dot_Restore_11 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Restore_11_12
+  xpos 834
+  ypos 291
+ }
+set N_Dot_Dot_Restore_11_12 [stack 0]
+ Input {
+  inputs 0
+  number 1
+  name MASK
+  xpos 140
+  ypos 144
+ }
+set N_MASK [stack 0]
+ Dot {
+  inputs 1
+  name Dot_MASK_13
+  xpos 174
+  ypos 219
+ }
+set N_Dot_MASK_13 [stack 0]
+push $N_Dot_Restore_11
+push $N_Dot_Dot_Dot_Dot_SOURCE_1_2_3_4
+ Keymix {
+  inputs 3
+  channels rgb
+  name Keymix4
+  xpos 660
+  ypos 216
+ }
+set N_Keymix4 [stack 0]
+push $N_Dot_Dot_Restore_11_12
+push $N_Keymix4
+ Switch {
+  inputs 2
+  which {{!parent.use_mask}}
+  name MaskSwitch
+  xpos 660
+  ypos 288
+ }
+set N_MaskSwitch [stack 0]
+ Dot {
+  inputs 1
+  name Dot_MaskSwitch_14
+  xpos 694
+  ypos 363
+ }
+set N_Dot_MaskSwitch_14 [stack 0]
+push $N_SOURCE
+ Dissolve {
+  inputs 2
+  which {{parent.mix}}
+  name SleepyMix
+  xpos 0
+  ypos 360
+ }
+set N_SleepyMix [stack 0]
+push $N_Dot_SpillView_10
+push $N_SleepyMix
+ Switch {
+  inputs 2
+  which {{parent.view}}
+  name ViewSwitch
+  xpos 0
+  ypos 432
+ }
+set N_ViewSwitch [stack 0]
+ Output {
+  inputs 1
+  name Output1
+  xpos 0
+  ypos 504
+ }
+set N_Output1 [stack 0]
+end_group

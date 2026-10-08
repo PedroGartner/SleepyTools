@@ -1,0 +1,55 @@
+kernel SleepyClarity : ImageComputationKernel<ePixelWise>
+{
+  Image<eRead, eAccessRanged2D, eEdgeClamped> src;
+  Image<eWrite> dst;
+
+param:
+  int radius;
+  float amount;
+  bool lumaOnly;
+  bool protectHighlights;
+
+local:
+  int r;
+  int stp;
+
+  void define() {
+    defineParam(radius, "radius", 20);
+    defineParam(amount, "amount", 0.4f);
+    defineParam(lumaOnly, "lumaOnly", true);
+    defineParam(protectHighlights, "protectHighlights", true);
+  }
+
+  void init() {
+    r = clamp(radius, 1, 100);
+    stp = max(1, r / 6);
+    src.setRange(-r, -r, r, r);
+  }
+
+  // local contrast: pushes each pixel away from its blurred surroundings (big-radius unsharp mask).
+  // Sparse sampling keeps large radii cheap.
+  void process(int2 pos) {
+    SampleType(src) c = src(0, 0);
+    float s2 = 2.0f * (r * 0.5f) * (r * 0.5f);
+    float3 sum = float3(0.0f);
+    float wsum = 0.0f;
+    for (int j = -r; j <= r; j += stp) {
+      for (int i = -r; i <= r; i += stp) {
+        SampleType(src) p = src(i, j);
+        float w = exp(-(float)(i * i + j * j) / s2);
+        sum += float3(p.x, p.y, p.z) * w;
+        wsum += w;
+      }
+    }
+    float3 m = sum / wsum;
+    float3 col = float3(c.x, c.y, c.z);
+    float lc = 0.2126f * c.x + 0.7152f * c.y + 0.0722f * c.z;
+    float lm = 0.2126f * m.x + 0.7152f * m.y + 0.0722f * m.z;
+    float k = amount;
+    if (protectHighlights) k *= clamp(1.5f - lc, 0.0f, 1.0f);
+    float3 o;
+    if (lumaOnly) o = col + float3((lc - lm) * k);
+    else o = col + (col - m) * k;
+    dst() = float4(o.x, o.y, o.z, c.w);
+  }
+};

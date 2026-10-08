@@ -1,0 +1,58 @@
+kernel SleepyFixBadPixels : ImageComputationKernel<ePixelWise>
+{
+  Image<eRead, eAccessRanged2D, eEdgeClamped> src;
+  Image<eWrite> dst;
+
+param:
+  int radius;
+  bool fixNegative;
+  bool showBad;
+
+local:
+  int r;
+
+  void define() {
+    defineParam(radius, "radius", 2);
+    defineParam(fixNegative, "fixNegative", false);
+    defineParam(showBad, "showBad", false);
+  }
+
+  void init() {
+    r = clamp(radius, 1, 8);
+    src.setRange(-r, -r, r, r);
+  }
+
+  bool bad(SampleType(src) p) {
+    float s = p.x + p.y + p.z + p.w;
+    if (!(s == s) || fabs(s) > 1e30f) return true;
+    if (!(p.x == p.x) || !(p.y == p.y) || !(p.z == p.z) || !(p.w == p.w)) return true;
+    if (fixNegative && (p.x < 0.0f || p.y < 0.0f || p.z < 0.0f)) return true;
+    return false;
+  }
+
+  // replaces NaN, infinite (and optionally negative) pixels with the average of the good ones around them
+  void process(int2 pos) {
+    SampleType(src) c = src(0, 0);
+    bool b = bad(c);
+    if (showBad) {
+      dst() = b ? float4(0.0f, 1.0f, 1.0f, 1.0f) : float4(0.0f, 0.0f, 0.0f, 0.0f);
+      return;
+    }
+    if (!b) {
+      dst() = c;
+      return;
+    }
+    float4 sum = float4(0.0f);
+    float n = 0.0f;
+    for (int j = -r; j <= r; j++) {
+      for (int i = -r; i <= r; i++) {
+        SampleType(src) p = src(i, j);
+        if (!bad(p)) {
+          sum += float4(p.x, p.y, p.z, p.w);
+          n += 1.0f;
+        }
+      }
+    }
+    dst() = n > 0.0f ? sum / n : float4(0.0f);
+  }
+};

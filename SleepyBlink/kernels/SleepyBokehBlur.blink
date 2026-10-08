@@ -1,0 +1,58 @@
+kernel SleepyBokehBlur : ImageComputationKernel<ePixelWise>
+{
+  Image<eRead, eAccessRanged2D, eEdgeClamped> src;
+  Image<eWrite> dst;
+
+param:
+  float size;
+  float threshold;
+  float boost;
+  int blades;
+  float rotation;
+
+local:
+  int r;
+
+  void define() {
+    defineParam(size, "size", 12.0f);
+    defineParam(threshold, "threshold", 0.8f);
+    defineParam(boost, "boost", 4.0f);
+    defineParam(blades, "blades", 0);
+    defineParam(rotation, "rotation", 0.0f);
+  }
+
+  void init() {
+    r = clamp((int)ceil(size), 1, 40);
+    src.setRange(-r, -r, r, r);
+  }
+
+  // 1 inside the aperture shape (circle, or a polygon with 'blades' sides), soft over 1 pixel
+  float aperture(float x, float y) {
+    float d = sqrt(x * x + y * y);
+    if (blades >= 3) {
+      float seg = 6.2831853f / blades;
+      float a = atan2(y, x) - rotation * 0.0174533f;
+      float t = fmod(fmod(a, seg) + seg, seg) - seg * 0.5f;
+      d = d * cos(t) / cos(seg * 0.5f);
+    }
+    return clamp(size + 0.5f - d, 0.0f, 1.0f);
+  }
+
+  // lens blur: averages over the aperture shape, with bright pixels weighted up so highlights bloom into discs
+  void process(int2 pos) {
+    float4 sum = float4(0.0f);
+    float wsum = 0.0f;
+    for (int j = -r; j <= r; j++) {
+      for (int i = -r; i <= r; i++) {
+        float ap = aperture((float)i, (float)j);
+        if (ap <= 0.0f) continue;
+        SampleType(src) p = src(i, j);
+        float l = 0.2126f * p.x + 0.7152f * p.y + 0.0722f * p.z;
+        float w = ap * (1.0f + boost * max(l - threshold, 0.0f));
+        sum += float4(p.x, p.y, p.z, p.w) * w;
+        wsum += w;
+      }
+    }
+    dst() = sum / max(wsum, 1e-8f);
+  }
+};

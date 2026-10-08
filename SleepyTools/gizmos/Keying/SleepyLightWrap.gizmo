@@ -1,0 +1,307 @@
+#! C:/Program Files/Nuke13.2v4/nuke-13.2.4.dll -nx
+version 13.2 v4
+Gizmo {
+ tile_color 0x3f9e5aff
+ inputs 2
+ help "Light wrap: spills blurred background light onto the inside edges of the foreground.\n\nInputs: FG (premultiplied), BG.\nOutput is the FG with the wrap added. Merge it over the BG as usual. Use 'Wrap only' to see the light being added."
+ addUserKnob {20 lw l "Controls"}
+ addUserKnob {26 sleepy_title l "" +STARTLINE T "<b><font size=\"4\">Sleepy LightWrap</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v1.0 &middot; Keying</font><br><font color=\"#a8a8a8\">Wraps blurred background light onto the inside edges of the foreground.</font>"}
+ addUserKnob {26 sleepy_title_div l "" +STARTLINE}
+ addUserKnob {7 wrap_width l "wrap width" t "How far the light reaches into the foreground (pixels)." R 0 100}
+ wrap_width 15
+ addUserKnob {7 falloff t "Above 1 = tighter to the edge, below 1 = spreads further in." R 0.2 4}
+ falloff 1
+ addUserKnob {7 intensity R 0 4}
+ intensity 1
+ addUserKnob {26 bgsec l "<b>Background</b>"}
+ addUserKnob {7 bg_blur l "bg blur" R 0 200}
+ bg_blur 30
+ addUserKnob {7 threshold l "highlights only" t "Only background light above this luminance wraps. 0 = all light." R 0 4}
+ addUserKnob {7 saturation t "0 = luminance-only wrap." R 0 2}
+ saturation 1
+ addUserKnob {26 outsec l "<b>Output</b>"}
+ addUserKnob {4 operation M {plus screen}}
+ addUserKnob {4 view M {Result "Wrap only" "Edge matte"}}
+ addUserKnob {26 sleepy_mix_div l "" +STARTLINE}
+ addUserKnob {7 mix t "Blend between the untouched input (0) and the result (1)."}
+ mix 1
+ addUserKnob {20 sleepy_about l About}
+ addUserKnob {26 sleepy_about_text l "" +STARTLINE T "<b><font size=\"4\">Sleepy LightWrap</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v1.0 &middot; Keying &middot; SleepyTools</font><br><br><b>Inputs</b><table><tr><td><b>FG</b>&nbsp;&nbsp;</td><td>premultiplied foreground</td></tr><tr><td><b>BG</b>&nbsp;&nbsp;</td><td>background</td></tr></table><br><b>How it works</b><br>Light wrap: spills blurred background light onto the inside edges of the foreground.<br><br>Inputs: FG (premultiplied), BG.<br>Output is the FG with the wrap added. Merge it over the BG as usual. Use &#x27;Wrap only&#x27; to see the light being added."}
+}
+ BackdropNode {
+  inputs 0
+  name BD_Background_light
+  tile_color 0x2f4a36ff
+  label "Background light"
+  note_font_size 24
+  xpos 300
+  ypos 22
+  bdwidth 140
+  bdheight 308
+  z_order 0
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Edge_matte
+  tile_color 0x2f4a36ff
+  label "Edge matte"
+  note_font_size 24
+  xpos 490
+  ypos 22
+  bdwidth 280
+  bdheight 236
+  z_order 1
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Wrap
+  tile_color 0x2f4a36ff
+  label "Wrap"
+  note_font_size 24
+  xpos 820
+  ypos 310
+  bdwidth 280
+  bdheight 164
+  z_order 2
+ }
+ Input {
+  inputs 0
+  number 1
+  name BG
+  xpos 140
+  ypos 0
+ }
+set N_BG [stack 0]
+ Dot {
+  inputs 1
+  name Dot_BG_1
+  xpos 174
+  ypos 39
+ }
+set N_Dot_BG_1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_BG_1_2
+  xpos 364
+  ypos 39
+ }
+set N_Dot_Dot_BG_1_2 [stack 0]
+ Blur {
+  inputs 1
+  channels rgb
+  size {{parent.bg_blur}}
+  name BGBlur
+  xpos 330
+  ypos 72
+ }
+set N_BGBlur [stack 0]
+ Expression {
+  inputs 1
+  disable {{parent.threshold==0}}
+  expr0 "r*max((0.2126*r+0.7152*g+0.0722*b)-parent.threshold,0)/max((0.2126*r+0.7152*g+0.0722*b),1e-6)"
+  expr1 "g*max((0.2126*r+0.7152*g+0.0722*b)-parent.threshold,0)/max((0.2126*r+0.7152*g+0.0722*b),1e-6)"
+  expr2 "b*max((0.2126*r+0.7152*g+0.0722*b)-parent.threshold,0)/max((0.2126*r+0.7152*g+0.0722*b),1e-6)"
+  name Highlights
+  xpos 330
+  ypos 144
+ }
+set N_Highlights [stack 0]
+ Saturation {
+  inputs 1
+  saturation {{parent.saturation}}
+  name BGSat
+  xpos 330
+  ypos 216
+ }
+set N_BGSat [stack 0]
+ Multiply {
+  inputs 1
+  channels rgb
+  value {{parent.intensity}}
+  name Intensity
+  xpos 330
+  ypos 288
+ }
+set N_Intensity [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Intensity_3
+  xpos 364
+  ypos 363
+ }
+set N_Dot_Intensity_3 [stack 0]
+ Input {
+  inputs 0
+  name FG
+  xpos 0
+  ypos 0
+ }
+set N_FG [stack 0]
+ Dot {
+  inputs 1
+  name Dot_FG_4
+  xpos 34
+  ypos 47
+ }
+set N_Dot_FG_4 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_FG_4_5
+  xpos 554
+  ypos 47
+ }
+set N_Dot_Dot_FG_4_5 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_FG_4_5_6
+  xpos 694
+  ypos 47
+ }
+set N_Dot_Dot_Dot_FG_4_5_6 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_FG_4_5_6_7
+  xpos 1024
+  ypos 47
+ }
+set N_Dot_Dot_Dot_Dot_FG_4_5_6_7 [stack 0]
+push $N_Dot_Dot_Dot_FG_4_5_6
+ Blur {
+  inputs 1
+  channels alpha
+  size {{parent.wrap_width}}
+  name AlphaBlur
+  xpos 660
+  ypos 72
+ }
+set N_AlphaBlur [stack 0]
+ Dot {
+  inputs 1
+  name Dot_AlphaBlur_8
+  xpos 694
+  ypos 147
+ }
+set N_Dot_AlphaBlur_8 [stack 0]
+push $N_Dot_Dot_FG_4_5
+ MergeExpression {
+  inputs 2
+  expr0 0
+  expr1 0
+  expr2 0
+  channel3 alpha
+  expr3 "pow(clamp(2*Ba*(1-Aa)),parent.falloff)"
+  name EdgeMatte
+  xpos 520
+  ypos 144
+ }
+set N_EdgeMatte [stack 0]
+ Dot {
+  inputs 1
+  name Dot_EdgeMatte_9
+  xpos 554
+  ypos 183
+ }
+set N_Dot_EdgeMatte_9 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_EdgeMatte_9_10
+  xpos 884
+  ypos 183
+ }
+set N_Dot_Dot_EdgeMatte_9_10 [stack 0]
+push $N_Dot_Intensity_3
+push $N_Dot_Dot_EdgeMatte_9_10
+ MergeExpression {
+  inputs 2
+  expr0 "Ar*Ba"
+  expr1 "Ag*Ba"
+  expr2 "Ab*Ba"
+  channel3 alpha
+  expr3 0
+  name Wrap
+  xpos 850
+  ypos 360
+ }
+set N_Wrap [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Wrap_11
+  xpos 884
+  ypos 435
+ }
+set N_Dot_Wrap_11 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Wrap_11_12
+  xpos 884
+  ypos 579
+ }
+set N_Dot_Dot_Wrap_11_12 [stack 0]
+push $N_Dot_Wrap_11
+push $N_Dot_Dot_Dot_Dot_FG_4_5_6_7
+ MergeExpression {
+  inputs 2
+  expr0 "parent.operation==0 ? Br+Ar : Br+Ar-Br*Ar"
+  expr1 "parent.operation==0 ? Bg+Ag : Bg+Ag-Bg*Ag"
+  expr2 "parent.operation==0 ? Bb+Ab : Bb+Ab-Bb*Ab"
+  channel3 alpha
+  expr3 Ba
+  name Comp
+  xpos 990
+  ypos 432
+ }
+set N_Comp [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Comp_13
+  xpos 1024
+  ypos 507
+ }
+set N_Dot_Comp_13 [stack 0]
+push $N_EdgeMatte
+ Expression {
+  inputs 1
+  expr0 a
+  expr1 a
+  expr2 a
+  name EdgeView
+  xpos 520
+  ypos 216
+ }
+set N_EdgeView [stack 0]
+ Dot {
+  inputs 1
+  name Dot_EdgeView_14
+  xpos 554
+  ypos 579
+ }
+set N_Dot_EdgeView_14 [stack 0]
+push $N_Dot_Comp_13
+push $N_FG
+ Dissolve {
+  inputs 2
+  which {{parent.mix}}
+  name SleepyMix
+  xpos 0
+  ypos 504
+ }
+set N_SleepyMix [stack 0]
+push $N_Dot_EdgeView_14
+push $N_Dot_Dot_Wrap_11_12
+push $N_SleepyMix
+ Switch {
+  inputs 3
+  which {{parent.view}}
+  name ViewSwitch
+  xpos 0
+  ypos 576
+ }
+set N_ViewSwitch [stack 0]
+ Output {
+  inputs 1
+  name Output1
+  xpos 0
+  ypos 648
+ }
+set N_Output1 [stack 0]
+end_group

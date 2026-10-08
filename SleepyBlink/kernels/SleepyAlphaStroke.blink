@@ -1,0 +1,57 @@
+kernel SleepyAlphaStroke : ImageComputationKernel<ePixelWise>
+{
+  Image<eRead, eAccessRanged2D, eEdgeClamped> src;
+  Image<eWrite> dst;
+
+param:
+  float width;
+  float softness;
+  float4 color;
+  int mode;
+  bool inside;
+
+local:
+  int r;
+
+  void define() {
+    defineParam(width, "width", 8.0f);
+    defineParam(softness, "softness", 1.5f);
+    defineParam(color, "color", float4(1.0f, 0.75f, 0.2f, 1.0f));
+    defineParam(mode, "mode", 0);
+    defineParam(inside, "inside", false);
+  }
+
+  void init() {
+    r = clamp((int)ceil(width + softness) + 1, 1, 64);
+    src.setRange(-r, -r, r, r);
+  }
+
+  // distance to the nearest pixel on the other side of the matte edge (alpha 0.5), searched within r.
+  // mode 0: stroke over the image, 1: stroke only, 2: distance field (0 at the edge, 1 at r)
+  void process(int2 pos) {
+    SampleType(src) c = src(0, 0);
+    bool inShape = c.w >= 0.5f;
+    float best = (float)r;
+    for (int j = -r; j <= r; j++) {
+      for (int i = -r; i <= r; i++) {
+        bool other = src(i, j).w >= 0.5f;
+        if (other != inShape) best = min(best, sqrt((float)(i * i + j * j)));
+      }
+    }
+    if (mode == 2) {
+      float v = best / (float)r;
+      dst() = float4(v, v, v, 1.0f);
+      return;
+    }
+    bool onSide = inside ? inShape : !inShape;
+    float s = onSide ? 1.0f - clamp((best - width + softness) / max(softness, 1e-3f), 0.0f, 1.0f) : 0.0f;
+    float sa = s * color.w;
+    if (mode == 1) {
+      dst() = float4(color.x * sa, color.y * sa, color.z * sa, sa);
+      return;
+    }
+    // stroke under the image (outside) or over it (inside), premultiplied
+    if (inside) dst() = float4(c.x + (color.x * sa - c.x) * s, c.y + (color.y * sa - c.y) * s, c.z + (color.z * sa - c.z) * s, max(c.w, sa));
+    else dst() = float4(c.x + color.x * sa * (1.0f - c.w), c.y + color.y * sa * (1.0f - c.w), c.z + color.z * sa * (1.0f - c.w), c.w + sa * (1.0f - c.w));
+  }
+};

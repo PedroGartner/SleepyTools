@@ -1,0 +1,254 @@
+#! C:/Program Files/Nuke13.2v4/nuke-13.2.4.dll -nx
+version 13.2 v4
+Gizmo {
+ tile_color 0x3f9e5aff
+ help "Chroma key by SleepyTools. v2 merges ALPHA and ChromaKeyer.\n\nModes\n- Colour pick: Ctrl+click the key colour in the viewer. Matches colour regardless of brightness.\n- Screen difference: classic green/blue screen matte (key colour = a screen sample).\n- Saturation: keys neutral / grey areas (what ALPHA's Key 01 was doing).\n\nThe plate RGB is passed through untouched; only alpha is replaced. Black pixels no longer produce NaN/inf."
+ addUserKnob {20 key l "Controls"}
+ addUserKnob {26 sleepy_title l "" +STARTLINE T "<b><font size=\"4\">Sleepy ChromaKey</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v2.0 &middot; Keying</font><br><font color=\"#a8a8a8\">Colour-pick, screen-difference or saturation key. Plate RGB untouched, only alpha replaced.</font>"}
+ addUserKnob {26 sleepy_title_div l "" +STARTLINE}
+ addUserKnob {4 mode M {"Colour pick" "Screen difference" "Saturation (neutral areas)"}}
+ addUserKnob {18 colour l "key colour" t "Ctrl+click on the plate in the viewer. In Screen difference mode, sample a typical area of the screen."}
+ colour {0.12 0.55 0.18}
+ addUserKnob {4 screen l "screen type" t "Screen difference mode only." M {Green Blue}}
+ addUserKnob {26 ""}
+ addUserKnob {7 tolerance t "Colour pick: how far from the key colour still counts as a full match." R 0 0.5}
+ tolerance 0.05
+ addUserKnob {7 softness t "Colour pick: width of the falloff after the tolerance." R 0 1}
+ softness 0.25
+ addUserKnob {7 dark_limit l "ignore darks below" t "Colour pick: pixels darker than this fade out of the key (the colour of dark noise is random). 0 = off." R 0 0.5}
+ addUserKnob {7 preblur l "pre-blur" t "Blur used only to calculate the key, for noisy plates. The output RGB is never blurred." R 0 10}
+ addUserKnob {26 matte l "<b>Matte</b>"}
+ addUserKnob {41 blackpoint T MatteGrade.blackpoint}
+ addUserKnob {41 whitepoint T MatteGrade.whitepoint}
+ addUserKnob {41 gamma T MatteGrade.gamma}
+ addUserKnob {6 binarise l "crunch (binarise)" t "Every alpha value above the threshold becomes 1, everything else 0. This is the old Fill Alpha." +STARTLINE}
+ addUserKnob {7 threshold -STARTLINE}
+ addUserKnob {6 invert l "invert matte" +STARTLINE}
+ addUserKnob {26 output l "<b>Output</b>"}
+ addUserKnob {6 premult l premultiply +STARTLINE}
+ addUserKnob {4 view M {Result Matte}}
+ addUserKnob {20 sleepy_about l About}
+ addUserKnob {26 sleepy_about_text l "" +STARTLINE T "<b><font size=\"4\">Sleepy ChromaKey</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v2.0 &middot; Keying &middot; SleepyTools</font><br><br><b>Inputs</b><table><tr><td><b>Input1</b>&nbsp;&nbsp;</td><td>plate to key</td></tr></table><br><b>How it works</b><br>Chroma key by SleepyTools. v2 merges ALPHA and ChromaKeyer.<br><br>Modes<br>- Colour pick: Ctrl+click the key colour in the viewer. Matches colour regardless of brightness.<br>- Screen difference: classic green/blue screen matte (key colour = a screen sample).<br>- Saturation: keys neutral / grey areas (what ALPHA&#x27;s Key 01 was doing).<br><br>The plate RGB is passed through untouched; only alpha is replaced. Black pixels no longer produce NaN/inf."}
+}
+ BackdropNode {
+  inputs 0
+  name BD_Key
+  tile_color 0x2f4a36ff
+  label "Key"
+  note_font_size 24
+  xpos 160
+  ypos 22
+  bdwidth 140
+  bdheight 164
+  z_order 0
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Matte
+  tile_color 0x2f4a36ff
+  label "Matte"
+  note_font_size 24
+  xpos 350
+  ypos 166
+  bdwidth 140
+  bdheight 308
+  z_order 1
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Output
+  tile_color 0x2f4a36ff
+  label "Output"
+  note_font_size 24
+  xpos 540
+  ypos 454
+  bdwidth 280
+  bdheight 236
+  z_order 2
+ }
+ Input {
+  inputs 0
+  name Input1
+  xpos 0
+  ypos 0
+ }
+set N_Input1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Input1_1
+  xpos 34
+  ypos 39
+ }
+set N_Dot_Input1_1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Input1_1_2
+  xpos 224
+  ypos 39
+ }
+set N_Dot_Dot_Input1_1_2 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Input1_1_2_3
+  xpos 604
+  ypos 39
+ }
+set N_Dot_Dot_Dot_Input1_1_2_3 [stack 0]
+push $N_Dot_Dot_Input1_1_2
+ Blur {
+  inputs 1
+  channels rgb
+  size {{parent.preblur}}
+  disable {{parent.preblur==0}}
+  name PreBlur
+  xpos 190
+  ypos 72
+ }
+set N_PreBlur [stack 0]
+ Expression {
+  inputs 1
+  temp_name0 pick
+  temp_expr0 "(1-clamp((sqrt((r/max(r+g+b,1e-6)-parent.colour.r/max(parent.colour.r+parent.colour.g+parent.colour.b,1e-6))*(r/max(r+g+b,1e-6)-parent.colour.r/max(parent.colour.r+parent.colour.g+parent.colour.b,1e-6))+(g/max(r+g+b,1e-6)-parent.colour.g/max(parent.colour.r+parent.colour.g+parent.colour.b,1e-6))*(g/max(r+g+b,1e-6)-parent.colour.g/max(parent.colour.r+parent.colour.g+parent.colour.b,1e-6))+(b/max(r+g+b,1e-6)-parent.colour.b/max(parent.colour.r+parent.colour.g+parent.colour.b,1e-6))*(b/max(r+g+b,1e-6)-parent.colour.b/max(parent.colour.r+parent.colour.g+parent.colour.b,1e-6)))-parent.tolerance)/max(parent.softness,1e-6)))*(parent.dark_limit>0 ? clamp((r+g+b)/(3*parent.dark_limit)) : 1)"
+  temp_name1 scr
+  temp_expr1 "1-clamp(parent.screen==0 ? (g-max(r,b))/max(parent.colour.g-max(parent.colour.r,parent.colour.b),1e-6) : (b-max(r,g))/max(parent.colour.b-max(parent.colour.r,parent.colour.g),1e-6))"
+  temp_name2 neutral
+  temp_expr2 "1-clamp((max(r,g,b)-min(r,g,b))/max(max(r,g,b),1e-6))"
+  channel0 alpha
+  expr0 "parent.mode==0 ? pick : parent.mode==1 ? scr : neutral"
+  name Key
+  xpos 190
+  ypos 144
+ }
+set N_Key [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Key_4
+  xpos 224
+  ypos 183
+ }
+set N_Dot_Key_4 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Key_4_5
+  xpos 414
+  ypos 183
+ }
+set N_Dot_Dot_Key_4_5 [stack 0]
+ Grade {
+  inputs 1
+  channels alpha
+  white_clamp true
+  name MatteGrade
+  xpos 380
+  ypos 216
+ }
+set N_MatteGrade [stack 0]
+ Expression {
+  inputs 1
+  channel0 alpha
+  expr0 "a>parent.threshold ? 1 : 0"
+  disable {{!parent.binarise}}
+  name Binarise
+  xpos 380
+  ypos 288
+ }
+set N_Binarise [stack 0]
+ Invert {
+  inputs 1
+  channels alpha
+  disable {{!parent.invert}}
+  name InvertMatte
+  xpos 380
+  ypos 360
+ }
+set N_InvertMatte [stack 0]
+ Clamp {
+  inputs 1
+  channels alpha
+  name ClampAlpha
+  xpos 380
+  ypos 432
+ }
+set N_ClampAlpha [stack 0]
+ Dot {
+  inputs 1
+  name Dot_ClampAlpha_6
+  xpos 414
+  ypos 507
+ }
+set N_Dot_ClampAlpha_6 [stack 0]
+push $N_Dot_Dot_Dot_Input1_1_2_3
+ Copy {
+  inputs 2
+  from0 rgba.alpha
+  to0 rgba.alpha
+  name CopyAlpha
+  xpos 570
+  ypos 504
+ }
+set N_CopyAlpha [stack 0]
+ Premult {
+  inputs 1
+  disable {{!parent.premult}}
+  name Premult1
+  xpos 570
+  ypos 576
+ }
+set N_Premult1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Premult1_7
+  xpos 604
+  ypos 615
+ }
+set N_Dot_Premult1_7 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Premult1_7_8
+  xpos 744
+  ypos 615
+ }
+set N_Dot_Dot_Premult1_7_8 [stack 0]
+push $N_Dot_Premult1_7
+ Dot {
+  inputs 1
+  name Dot_Dot_Premult1_7_9
+  xpos 34
+  ypos 615
+ }
+set N_Dot_Dot_Premult1_7_9 [stack 0]
+push $N_Dot_Dot_Premult1_7_8
+ Expression {
+  inputs 1
+  expr0 a
+  expr1 a
+  expr2 a
+  name MatteView
+  xpos 710
+  ypos 648
+ }
+set N_MatteView [stack 0]
+ Dot {
+  inputs 1
+  name Dot_MatteView_10
+  xpos 744
+  ypos 723
+ }
+set N_Dot_MatteView_10 [stack 0]
+push $N_Dot_Dot_Premult1_7_9
+ Switch {
+  inputs 2
+  which {{parent.view}}
+  name ViewSwitch
+  xpos 0
+  ypos 720
+ }
+set N_ViewSwitch [stack 0]
+ Output {
+  inputs 1
+  name Output1
+  xpos 0
+  ypos 792
+ }
+set N_Output1 [stack 0]
+end_group

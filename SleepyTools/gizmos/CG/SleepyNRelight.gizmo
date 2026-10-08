@@ -1,0 +1,123 @@
+#! C:/Program Files/Nuke13.2v4/nuke-13.2.4.dll -nx
+version 13.2 v4
+Gizmo {
+ tile_color 0x7d62b8ff
+ help "Quick relight from a normals pass.\n\nAdds a directional light: diffuse uses the beauty as its colour, plus an optional specular highlight. Azimuth turns the light around, elevation raises it.\n\nNormals should be normalised. Specular assumes camera-space normals (camera looking down -Z); with world-space normals just use diffuse."
+ addUserKnob {20 nr l "Controls"}
+ addUserKnob {26 sleepy_title l "" +STARTLINE T "<b><font size=\"4\">Sleepy NRelight</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v1.0 &middot; CG</font><br><font color=\"#a8a8a8\">Directional relight from a normals pass with wrap and specular.</font>"}
+ addUserKnob {26 sleepy_title_div l "" +STARTLINE}
+ addUserKnob {41 in1 l "N layer" T Shuf_N.in1}
+ addUserKnob {7 azimuth R -180 180}
+ azimuth 45
+ addUserKnob {7 elevation R -90 90}
+ elevation 30
+ addUserKnob {18 light_colour l "light colour"}
+ light_colour {1 0.9 0.8}
+ addUserKnob {7 intensity R 0 4}
+ intensity 0.5
+ addUserKnob {7 wrap t "Lets the light wrap past the terminator for a softer falloff." R 0 1}
+ addUserKnob {7 spec l specular R 0 2}
+ addUserKnob {7 shininess R 1 200}
+ shininess 30
+ addUserKnob {4 view M {Result "Light only"}}
+ addUserKnob {26 sleepy_mix_div l "" +STARTLINE}
+ addUserKnob {7 mix t "Blend between the untouched input (0) and the result (1)."}
+ mix 1
+ addUserKnob {20 sleepy_about l About}
+ addUserKnob {26 sleepy_about_text l "" +STARTLINE T "<b><font size=\"4\">Sleepy NRelight</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v1.0 &middot; CG &middot; SleepyTools</font><br><br><b>Inputs</b><table><tr><td><b>cg</b>&nbsp;&nbsp;</td><td>CG render with an N (normals) layer</td></tr></table><br><b>How it works</b><br>Quick relight from a normals pass.<br><br>Adds a directional light: diffuse uses the beauty as its colour, plus an optional specular highlight. Azimuth turns the light around, elevation raises it.<br><br>Normals should be normalised. Specular assumes camera-space normals (camera looking down -Z); with world-space normals just use diffuse."}
+}
+ BackdropNode {
+  inputs 0
+  name BD_Relight
+  tile_color 0x3a3150ff
+  label "Relight"
+  note_font_size 24
+  xpos 160
+  ypos 22
+  bdwidth 280
+  bdheight 164
+  z_order 0
+ }
+ Input {
+  inputs 0
+  name cg
+  xpos 0
+  ypos 0
+ }
+set N_cg [stack 0]
+ Dot {
+  inputs 1
+  name Dot_cg_1
+  xpos 34
+  ypos 39
+ }
+set N_Dot_cg_1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_cg_1_2
+  xpos 224
+  ypos 39
+ }
+set N_Dot_Dot_cg_1_2 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_cg_1_2_3
+  xpos 364
+  ypos 39
+ }
+set N_Dot_Dot_Dot_cg_1_2_3 [stack 0]
+ Shuffle2 {
+  inputs 1
+  fromInput1 {{0} B}
+  in1 none
+  fromInput2 {{0} B}
+  mappings "4 black -1 -1 rgba.red 0 0 black -1 -1 rgba.green 0 1 black -1 -1 rgba.blue 0 2 black -1 -1 rgba.alpha 0 3"
+  name Shuf_N
+  xpos 330
+  ypos 72
+ }
+set N_Shuf_N [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Shuf_N_4
+  xpos 364
+  ypos 147
+ }
+set N_Dot_Shuf_N_4 [stack 0]
+push $N_Dot_Dot_cg_1_2
+ MergeExpression {
+  inputs 2
+  channel3 alpha
+  expr3 Ba
+  expr0 "parent.view==0 ? Br+((clamp(((Ar*(cos((parent.elevation*pi/180))*sin((parent.azimuth*pi/180)))+Ag*(sin((parent.elevation*pi/180)))+Ab*(cos((parent.elevation*pi/180))*cos((parent.azimuth*pi/180))))+parent.wrap)/(1+parent.wrap))*parent.intensity*Br+(pow(max(((Ar*(cos((parent.elevation*pi/180))*sin((parent.azimuth*pi/180)))+Ag*(sin((parent.elevation*pi/180)))+Ab*((cos((parent.elevation*pi/180))*cos((parent.azimuth*pi/180)))+1))/max(sqrt(((cos((parent.elevation*pi/180))*sin((parent.azimuth*pi/180))))*((cos((parent.elevation*pi/180))*sin((parent.azimuth*pi/180))))+((sin((parent.elevation*pi/180))))*((sin((parent.elevation*pi/180))))+((cos((parent.elevation*pi/180))*cos((parent.azimuth*pi/180)))+1)*((cos((parent.elevation*pi/180))*cos((parent.azimuth*pi/180)))+1)),1e-6)),0),parent.shininess)*parent.spec))*parent.light_colour.r*clamp(Ba)) : ((clamp(((Ar*(cos((parent.elevation*pi/180))*sin((parent.azimuth*pi/180)))+Ag*(sin((parent.elevation*pi/180)))+Ab*(cos((parent.elevation*pi/180))*cos((parent.azimuth*pi/180))))+parent.wrap)/(1+parent.wrap))*parent.intensity*Br+(pow(max(((Ar*(cos((parent.elevation*pi/180))*sin((parent.azimuth*pi/180)))+Ag*(sin((parent.elevation*pi/180)))+Ab*((cos((parent.elevation*pi/180))*cos((parent.azimuth*pi/180)))+1))/max(sqrt(((cos((parent.elevation*pi/180))*sin((parent.azimuth*pi/180))))*((cos((parent.elevation*pi/180))*sin((parent.azimuth*pi/180))))+((sin((parent.elevation*pi/180))))*((sin((parent.elevation*pi/180))))+((cos((parent.elevation*pi/180))*cos((parent.azimuth*pi/180)))+1)*((cos((parent.elevation*pi/180))*cos((parent.azimuth*pi/180)))+1)),1e-6)),0),parent.shininess)*parent.spec))*parent.light_colour.r*clamp(Ba))"
+  expr1 "parent.view==0 ? Bg+((clamp(((Ar*(cos((parent.elevation*pi/180))*sin((parent.azimuth*pi/180)))+Ag*(sin((parent.elevation*pi/180)))+Ab*(cos((parent.elevation*pi/180))*cos((parent.azimuth*pi/180))))+parent.wrap)/(1+parent.wrap))*parent.intensity*Bg+(pow(max(((Ar*(cos((parent.elevation*pi/180))*sin((parent.azimuth*pi/180)))+Ag*(sin((parent.elevation*pi/180)))+Ab*((cos((parent.elevation*pi/180))*cos((parent.azimuth*pi/180)))+1))/max(sqrt(((cos((parent.elevation*pi/180))*sin((parent.azimuth*pi/180))))*((cos((parent.elevation*pi/180))*sin((parent.azimuth*pi/180))))+((sin((parent.elevation*pi/180))))*((sin((parent.elevation*pi/180))))+((cos((parent.elevation*pi/180))*cos((parent.azimuth*pi/180)))+1)*((cos((parent.elevation*pi/180))*cos((parent.azimuth*pi/180)))+1)),1e-6)),0),parent.shininess)*parent.spec))*parent.light_colour.g*clamp(Ba)) : ((clamp(((Ar*(cos((parent.elevation*pi/180))*sin((parent.azimuth*pi/180)))+Ag*(sin((parent.elevation*pi/180)))+Ab*(cos((parent.elevation*pi/180))*cos((parent.azimuth*pi/180))))+parent.wrap)/(1+parent.wrap))*parent.intensity*Bg+(pow(max(((Ar*(cos((parent.elevation*pi/180))*sin((parent.azimuth*pi/180)))+Ag*(sin((parent.elevation*pi/180)))+Ab*((cos((parent.elevation*pi/180))*cos((parent.azimuth*pi/180)))+1))/max(sqrt(((cos((parent.elevation*pi/180))*sin((parent.azimuth*pi/180))))*((cos((parent.elevation*pi/180))*sin((parent.azimuth*pi/180))))+((sin((parent.elevation*pi/180))))*((sin((parent.elevation*pi/180))))+((cos((parent.elevation*pi/180))*cos((parent.azimuth*pi/180)))+1)*((cos((parent.elevation*pi/180))*cos((parent.azimuth*pi/180)))+1)),1e-6)),0),parent.shininess)*parent.spec))*parent.light_colour.g*clamp(Ba))"
+  expr2 "parent.view==0 ? Bb+((clamp(((Ar*(cos((parent.elevation*pi/180))*sin((parent.azimuth*pi/180)))+Ag*(sin((parent.elevation*pi/180)))+Ab*(cos((parent.elevation*pi/180))*cos((parent.azimuth*pi/180))))+parent.wrap)/(1+parent.wrap))*parent.intensity*Bb+(pow(max(((Ar*(cos((parent.elevation*pi/180))*sin((parent.azimuth*pi/180)))+Ag*(sin((parent.elevation*pi/180)))+Ab*((cos((parent.elevation*pi/180))*cos((parent.azimuth*pi/180)))+1))/max(sqrt(((cos((parent.elevation*pi/180))*sin((parent.azimuth*pi/180))))*((cos((parent.elevation*pi/180))*sin((parent.azimuth*pi/180))))+((sin((parent.elevation*pi/180))))*((sin((parent.elevation*pi/180))))+((cos((parent.elevation*pi/180))*cos((parent.azimuth*pi/180)))+1)*((cos((parent.elevation*pi/180))*cos((parent.azimuth*pi/180)))+1)),1e-6)),0),parent.shininess)*parent.spec))*parent.light_colour.b*clamp(Ba)) : ((clamp(((Ar*(cos((parent.elevation*pi/180))*sin((parent.azimuth*pi/180)))+Ag*(sin((parent.elevation*pi/180)))+Ab*(cos((parent.elevation*pi/180))*cos((parent.azimuth*pi/180))))+parent.wrap)/(1+parent.wrap))*parent.intensity*Bb+(pow(max(((Ar*(cos((parent.elevation*pi/180))*sin((parent.azimuth*pi/180)))+Ag*(sin((parent.elevation*pi/180)))+Ab*((cos((parent.elevation*pi/180))*cos((parent.azimuth*pi/180)))+1))/max(sqrt(((cos((parent.elevation*pi/180))*sin((parent.azimuth*pi/180))))*((cos((parent.elevation*pi/180))*sin((parent.azimuth*pi/180))))+((sin((parent.elevation*pi/180))))*((sin((parent.elevation*pi/180))))+((cos((parent.elevation*pi/180))*cos((parent.azimuth*pi/180)))+1)*((cos((parent.elevation*pi/180))*cos((parent.azimuth*pi/180)))+1)),1e-6)),0),parent.shininess)*parent.spec))*parent.light_colour.b*clamp(Ba))"
+  name Relight
+  xpos 190
+  ypos 144
+ }
+set N_Relight [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Relight_5
+  xpos 224
+  ypos 219
+ }
+set N_Dot_Relight_5 [stack 0]
+push $N_cg
+ Dissolve {
+  inputs 2
+  which {{parent.mix}}
+  name SleepyMix
+  xpos 0
+  ypos 216
+ }
+set N_SleepyMix [stack 0]
+ Output {
+  inputs 1
+  name Output1
+  xpos 0
+  ypos 288
+ }
+set N_Output1 [stack 0]
+end_group

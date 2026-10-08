@@ -1,0 +1,57 @@
+kernel SleepyEdgeExtend : ImageComputationKernel<ePixelWise>
+{
+  Image<eRead, eAccessRanged2D, eEdgeClamped> src;
+  Image<eWrite> dst;
+
+param:
+  int radius;
+  float softness;
+  bool premultiplied;
+  bool keepCore;
+  float coreThreshold;
+
+local:
+  int r;
+
+  void define() {
+    defineParam(radius, "radius", 12);
+    defineParam(softness, "softness", 0.5f);
+    defineParam(premultiplied, "premultiplied", true);
+    defineParam(keepCore, "keepCore", true);
+    defineParam(coreThreshold, "coreThreshold", 0.8f);
+  }
+
+  void init() {
+    r = clamp(radius, 1, 64);
+    src.setRange(-r, -r, r, r);
+  }
+
+  // average of nearby solid-core colour (normalised convolution): only pixels with alpha above
+  // coreThreshold contribute, so spill in the soft edge isn't spread. Pushes the foreground colour
+  // out under soft edges so they don't carry the background or a dark fringe. Output is unpremultiplied
+  // colour with the original alpha; premultiply after it.
+  void process(int2 pos) {
+    SampleType(src) c = src(0, 0);
+    float sigma = max(r * softness, 0.5f);
+    float s2 = 2.0f * sigma * sigma;
+    float3 sum = float3(0.0f);
+    float wsum = 0.0f;
+    for (int j = -r; j <= r; j++) {
+      for (int i = -r; i <= r; i++) {
+        SampleType(src) p = src(i, j);
+        float core = clamp((p.w - coreThreshold + 0.15f) / 0.15f, 0.0f, 1.0f);
+        float w = exp(-(float)(i * i + j * j) / s2) * core;
+        float3 col = float3(p.x, p.y, p.z);
+        if (premultiplied) col = p.w > 1e-5f ? col / p.w : float3(0.0f);
+        sum += col * w;
+        wsum += w;
+      }
+    }
+    float3 ext = wsum > 1e-8f ? sum / wsum : float3(0.0f);
+    float3 own = float3(c.x, c.y, c.z);
+    if (premultiplied) own = c.w > 1e-5f ? own / c.w : float3(0.0f);
+    float keep = keepCore ? clamp((c.w - 0.95f) / 0.05f, 0.0f, 1.0f) : 0.0f;
+    float3 o = ext + (own - ext) * keep;
+    dst() = float4(o.x, o.y, o.z, c.w);
+  }
+};

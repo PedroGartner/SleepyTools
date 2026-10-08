@@ -1,0 +1,999 @@
+#! C:/Program Files/Nuke13.2v4/nuke-13.2.4.dll -nx
+version 13.2 v4
+Gizmo {
+ tile_color 0x4f7fb5ff
+ inputs 2
+ help "Fills a masked hole in a plate with the surrounding colour (push-pull), then adds real plate grain copied from a nearby area.\n\nInputs: plate, mask (alpha = area to remove).\n\nGood for rig/marker removal and as a base for paint. Set 'grain offset' so it points at a clean area of the plate."
+ addUserKnob {20 pf l "Controls"}
+ addUserKnob {26 sleepy_title l "" +STARTLINE T "<b><font size=\"4\">Sleepy PlateFill</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v1.0 &middot; Cleanup</font><br><font color=\"#a8a8a8\">Fills a masked hole with surrounding colour and borrows real grain from nearby.</font>"}
+ addUserKnob {26 sleepy_title_div l "" +STARTLINE}
+ addUserKnob {7 grow l "grow mask" t "Expands the mask before filling, so the fill starts outside any soft edge of the object." R 0 20}
+ grow 2
+ addUserKnob {7 softness l "edge softness" t "Blur of the mask used to blend the fill back in." R 0 20}
+ softness 2
+ addUserKnob {7 fill_scale l "fill scale" t "Scales every level of the fill. Lower = more local colour, higher = smoother." R 0.25 4}
+ fill_scale 1
+ addUserKnob {7 detail t "How strongly the finer levels win over the coarser ones. Higher keeps more structure near the edge, lower gives a smoother fill." R 1 10}
+ detail 3
+ addUserKnob {26 grain l "<b>Grain</b>"}
+ addUserKnob {7 regrain l "regrain amount" R 0 2}
+ regrain 1
+ addUserKnob {7 grain_size l "grain size" t "Blur used to separate grain from detail." R 0.5 5}
+ grain_size 1.5
+ addUserKnob {12 grain_offset l "grain offset" t "Where to borrow grain from, relative to the hole (pixels). Point it at a clean, flat area."}
+ grain_offset {150 0}
+ addUserKnob {4 view M {Result "Fill only" Mask}}
+ addUserKnob {26 sleepy_mix_div l "" +STARTLINE}
+ addUserKnob {7 mix t "Blend between the untouched input (0) and the result (1)."}
+ mix 1
+ addUserKnob {20 sleepy_about l About}
+ addUserKnob {26 sleepy_about_text l "" +STARTLINE T "<b><font size=\"4\">Sleepy PlateFill</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v1.0 &middot; Cleanup &middot; SleepyTools</font><br><br><b>Inputs</b><table><tr><td><b>plate</b>&nbsp;&nbsp;</td><td>plate</td></tr><tr><td><b>mask</b>&nbsp;&nbsp;</td><td>area to remove (alpha)</td></tr></table><br><b>How it works</b><br>Fills a masked hole in a plate with the surrounding colour (push-pull), then adds real plate grain copied from a nearby area.<br><br>Inputs: plate, mask (alpha = area to remove).<br><br>Good for rig/marker removal and as a base for paint. Set &#x27;grain offset&#x27; so it points at a clean area of the plate."}
+}
+ BackdropNode {
+  inputs 0
+  name BD_Mask
+  tile_color 0x2f3d4fff
+  label "Mask"
+  note_font_size 24
+  xpos 300
+  ypos 22
+  bdwidth 280
+  bdheight 164
+  z_order 0
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Push_pull_fill
+  tile_color 0x2f3d4fff
+  label "Push-pull fill"
+  note_font_size 24
+  xpos 630
+  ypos 94
+  bdwidth 1540
+  bdheight 1100
+  z_order 1
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Regrain
+  tile_color 0x2f3d4fff
+  label "Regrain"
+  note_font_size 24
+  xpos 2220
+  ypos 22
+  bdwidth 140
+  bdheight 1244
+  z_order 2
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Blend
+  tile_color 0x2f3d4fff
+  label "Blend"
+  note_font_size 24
+  xpos 2410
+  ypos 1246
+  bdwidth 140
+  bdheight 92
+  z_order 3
+ }
+ Input {
+  inputs 0
+  number 1
+  name mask
+  xpos 140
+  ypos 0
+ }
+set N_mask [stack 0]
+ Dot {
+  inputs 1
+  name Dot_mask_1
+  xpos 174
+  ypos 39
+ }
+set N_Dot_mask_1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_mask_1_2
+  xpos 364
+  ypos 39
+ }
+set N_Dot_Dot_mask_1_2 [stack 0]
+ Dilate {
+  inputs 1
+  channels alpha
+  size {{parent.grow}}
+  name GrowMask
+  xpos 330
+  ypos 72
+ }
+set N_GrowMask [stack 0]
+ Dot {
+  inputs 1
+  name Dot_GrowMask_3
+  xpos 364
+  ypos 111
+ }
+set N_Dot_GrowMask_3 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_GrowMask_3_4
+  xpos 504
+  ypos 111
+ }
+set N_Dot_Dot_GrowMask_3_4 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_GrowMask_3_4_5
+  xpos 624
+  ypos 111
+ }
+set N_Dot_Dot_Dot_GrowMask_3_4_5 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_GrowMask_3_4_5_6
+  xpos 624
+  ypos 147
+ }
+set N_Dot_Dot_Dot_Dot_GrowMask_3_4_5_6 [stack 0]
+push $N_GrowMask
+ Expression {
+  inputs 1
+  expr0 a
+  expr1 a
+  expr2 a
+  name MaskView
+  xpos 330
+  ypos 144
+ }
+set N_MaskView [stack 0]
+ Dot {
+  inputs 1
+  name Dot_MaskView_7
+  xpos 364
+  ypos 1443
+ }
+set N_Dot_MaskView_7 [stack 0]
+ Input {
+  inputs 0
+  name plate
+  xpos 0
+  ypos 0
+ }
+set N_plate [stack 0]
+ Dot {
+  inputs 1
+  name Dot_plate_8
+  xpos 34
+  ypos 47
+ }
+set N_Dot_plate_8 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_plate_8_9
+  xpos 694
+  ypos 47
+ }
+set N_Dot_Dot_plate_8_9 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_plate_8_9_10
+  xpos 2284
+  ypos 47
+ }
+set N_Dot_Dot_Dot_plate_8_9_10 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_plate_8_9_10_11
+  xpos 2214
+  ypos 47
+ }
+set N_Dot_Dot_Dot_Dot_plate_8_9_10_11 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_plate_8_9_10_11_12
+  xpos 2214
+  ypos 147
+ }
+set N_Dot_Dot_Dot_Dot_Dot_plate_8_9_10_11_12 [stack 0]
+push $N_Dot_Dot_Dot_Dot_plate_8_9_10_11
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_plate_8_9_10_11_13
+  xpos 2474
+  ypos 47
+ }
+set N_Dot_Dot_Dot_Dot_Dot_plate_8_9_10_11_13 [stack 0]
+push $N_Dot_Dot_Dot_Dot_GrowMask_3_4_5_6
+push $N_Dot_Dot_plate_8_9
+ MergeExpression {
+  inputs 2
+  expr0 "Br*(1-clamp(Aa))"
+  expr1 "Bg*(1-clamp(Aa))"
+  expr2 "Bb*(1-clamp(Aa))"
+  channel3 alpha
+  expr3 "1-clamp(Aa)"
+  name Holed
+  xpos 660
+  ypos 144
+ }
+set N_Holed [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Holed_14
+  xpos 694
+  ypos 183
+ }
+set N_Dot_Holed_14 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Holed_14_15
+  xpos 834
+  ypos 183
+ }
+set N_Dot_Dot_Holed_14_15 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Holed_14_15_16
+  xpos 974
+  ypos 183
+ }
+set N_Dot_Dot_Dot_Holed_14_15_16 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Holed_14_15_16_17
+  xpos 1114
+  ypos 183
+ }
+set N_Dot_Dot_Dot_Dot_Holed_14_15_16_17 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Holed_14_15_16_17_18
+  xpos 1254
+  ypos 183
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Holed_14_15_16_17_18 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Holed_14_15_16_17_18_19
+  xpos 1394
+  ypos 183
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Holed_14_15_16_17_18_19 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Dot_Holed_14_15_16_17_18_19_20
+  xpos 1534
+  ypos 183
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Holed_14_15_16_17_18_19_20 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Holed_14_15_16_17_18_19_20_21
+  xpos 1674
+  ypos 183
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Holed_14_15_16_17_18_19_20_21 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Holed_14_15_16_17_18_19_20_21_22
+  xpos 1814
+  ypos 183
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Holed_14_15_16_17_18_19_20_21_22 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Holed_14_15_16_17_18_19_20_21_22_23
+  xpos 1954
+  ypos 183
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Holed_14_15_16_17_18_19_20_21_22_23 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Holed_14_15_16_17_18_19_20_21_22_23_24
+  xpos 2094
+  ypos 183
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Holed_14_15_16_17_18_19_20_21_22_23_24 [stack 0]
+ Blur {
+  inputs 1
+  channels rgba
+  size {{parent.fill_scale*1024}}
+  name PF_Blur9
+  xpos 2060
+  ypos 216
+ }
+set N_PF_Blur9 [stack 0]
+ Unpremult {
+  inputs 1
+  channels rgb
+  name PF_Unp9
+  xpos 2060
+  ypos 288
+ }
+set N_PF_Unp9 [stack 0]
+ Expression {
+  inputs 1
+  channel0 alpha
+  expr0 1
+  name PF_Solid9
+  xpos 2060
+  ypos 360
+ }
+set N_PF_Solid9 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_PF_Solid9_25
+  xpos 2094
+  ypos 507
+ }
+set N_Dot_PF_Solid9_25 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Holed_14_15_16_17_18_19_20_21_22_23
+ Blur {
+  inputs 1
+  channels rgba
+  size {{parent.fill_scale*512}}
+  name PF_Blur8
+  xpos 1920
+  ypos 216
+ }
+set N_PF_Blur8 [stack 0]
+ Unpremult {
+  inputs 1
+  channels rgb
+  name PF_Unp8
+  xpos 1920
+  ypos 288
+ }
+set N_PF_Unp8 [stack 0]
+ Expression {
+  inputs 1
+  channel0 alpha
+  expr0 "clamp(a*parent.detail)"
+  name PF_Boost8
+  xpos 1920
+  ypos 360
+ }
+set N_PF_Boost8 [stack 0]
+ Premult {
+  inputs 1
+  channels rgb
+  name PF_Pre8
+  xpos 1920
+  ypos 432
+ }
+set N_PF_Pre8 [stack 0]
+push $N_Dot_PF_Solid9_25
+push $N_PF_Pre8
+ Merge2 {
+  inputs 2
+  operation under
+  name PF_Under8
+  xpos 1920
+  ypos 504
+ }
+set N_PF_Under8 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_PF_Under8_26
+  xpos 1954
+  ypos 579
+ }
+set N_Dot_PF_Under8_26 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Holed_14_15_16_17_18_19_20_21_22
+ Blur {
+  inputs 1
+  channels rgba
+  size {{parent.fill_scale*256}}
+  name PF_Blur7
+  xpos 1780
+  ypos 216
+ }
+set N_PF_Blur7 [stack 0]
+ Unpremult {
+  inputs 1
+  channels rgb
+  name PF_Unp7
+  xpos 1780
+  ypos 288
+ }
+set N_PF_Unp7 [stack 0]
+ Expression {
+  inputs 1
+  channel0 alpha
+  expr0 "clamp(a*parent.detail)"
+  name PF_Boost7
+  xpos 1780
+  ypos 360
+ }
+set N_PF_Boost7 [stack 0]
+ Premult {
+  inputs 1
+  channels rgb
+  name PF_Pre7
+  xpos 1780
+  ypos 432
+ }
+set N_PF_Pre7 [stack 0]
+push $N_Dot_PF_Under8_26
+push $N_PF_Pre7
+ Merge2 {
+  inputs 2
+  operation under
+  name PF_Under7
+  xpos 1780
+  ypos 576
+ }
+set N_PF_Under7 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_PF_Under7_27
+  xpos 1814
+  ypos 651
+ }
+set N_Dot_PF_Under7_27 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Holed_14_15_16_17_18_19_20_21
+ Blur {
+  inputs 1
+  channels rgba
+  size {{parent.fill_scale*128}}
+  name PF_Blur6
+  xpos 1640
+  ypos 216
+ }
+set N_PF_Blur6 [stack 0]
+ Unpremult {
+  inputs 1
+  channels rgb
+  name PF_Unp6
+  xpos 1640
+  ypos 288
+ }
+set N_PF_Unp6 [stack 0]
+ Expression {
+  inputs 1
+  channel0 alpha
+  expr0 "clamp(a*parent.detail)"
+  name PF_Boost6
+  xpos 1640
+  ypos 360
+ }
+set N_PF_Boost6 [stack 0]
+ Premult {
+  inputs 1
+  channels rgb
+  name PF_Pre6
+  xpos 1640
+  ypos 432
+ }
+set N_PF_Pre6 [stack 0]
+push $N_Dot_PF_Under7_27
+push $N_PF_Pre6
+ Merge2 {
+  inputs 2
+  operation under
+  name PF_Under6
+  xpos 1640
+  ypos 648
+ }
+set N_PF_Under6 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_PF_Under6_28
+  xpos 1674
+  ypos 723
+ }
+set N_Dot_PF_Under6_28 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Holed_14_15_16_17_18_19_20
+ Blur {
+  inputs 1
+  channels rgba
+  size {{parent.fill_scale*64}}
+  name PF_Blur5
+  xpos 1500
+  ypos 216
+ }
+set N_PF_Blur5 [stack 0]
+ Unpremult {
+  inputs 1
+  channels rgb
+  name PF_Unp5
+  xpos 1500
+  ypos 288
+ }
+set N_PF_Unp5 [stack 0]
+ Expression {
+  inputs 1
+  channel0 alpha
+  expr0 "clamp(a*parent.detail)"
+  name PF_Boost5
+  xpos 1500
+  ypos 360
+ }
+set N_PF_Boost5 [stack 0]
+ Premult {
+  inputs 1
+  channels rgb
+  name PF_Pre5
+  xpos 1500
+  ypos 432
+ }
+set N_PF_Pre5 [stack 0]
+push $N_Dot_PF_Under6_28
+push $N_PF_Pre5
+ Merge2 {
+  inputs 2
+  operation under
+  name PF_Under5
+  xpos 1500
+  ypos 720
+ }
+set N_PF_Under5 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_PF_Under5_29
+  xpos 1534
+  ypos 795
+ }
+set N_Dot_PF_Under5_29 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_Holed_14_15_16_17_18_19
+ Blur {
+  inputs 1
+  channels rgba
+  size {{parent.fill_scale*32}}
+  name PF_Blur4
+  xpos 1360
+  ypos 216
+ }
+set N_PF_Blur4 [stack 0]
+ Unpremult {
+  inputs 1
+  channels rgb
+  name PF_Unp4
+  xpos 1360
+  ypos 288
+ }
+set N_PF_Unp4 [stack 0]
+ Expression {
+  inputs 1
+  channel0 alpha
+  expr0 "clamp(a*parent.detail)"
+  name PF_Boost4
+  xpos 1360
+  ypos 360
+ }
+set N_PF_Boost4 [stack 0]
+ Premult {
+  inputs 1
+  channels rgb
+  name PF_Pre4
+  xpos 1360
+  ypos 432
+ }
+set N_PF_Pre4 [stack 0]
+push $N_Dot_PF_Under5_29
+push $N_PF_Pre4
+ Merge2 {
+  inputs 2
+  operation under
+  name PF_Under4
+  xpos 1360
+  ypos 792
+ }
+set N_PF_Under4 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_PF_Under4_30
+  xpos 1394
+  ypos 867
+ }
+set N_Dot_PF_Under4_30 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_Holed_14_15_16_17_18
+ Blur {
+  inputs 1
+  channels rgba
+  size {{parent.fill_scale*16}}
+  name PF_Blur3
+  xpos 1220
+  ypos 216
+ }
+set N_PF_Blur3 [stack 0]
+ Unpremult {
+  inputs 1
+  channels rgb
+  name PF_Unp3
+  xpos 1220
+  ypos 288
+ }
+set N_PF_Unp3 [stack 0]
+ Expression {
+  inputs 1
+  channel0 alpha
+  expr0 "clamp(a*parent.detail)"
+  name PF_Boost3
+  xpos 1220
+  ypos 360
+ }
+set N_PF_Boost3 [stack 0]
+ Premult {
+  inputs 1
+  channels rgb
+  name PF_Pre3
+  xpos 1220
+  ypos 432
+ }
+set N_PF_Pre3 [stack 0]
+push $N_Dot_PF_Under4_30
+push $N_PF_Pre3
+ Merge2 {
+  inputs 2
+  operation under
+  name PF_Under3
+  xpos 1220
+  ypos 864
+ }
+set N_PF_Under3 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_PF_Under3_31
+  xpos 1254
+  ypos 939
+ }
+set N_Dot_PF_Under3_31 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Holed_14_15_16_17
+ Blur {
+  inputs 1
+  channels rgba
+  size {{parent.fill_scale*8}}
+  name PF_Blur2
+  xpos 1080
+  ypos 216
+ }
+set N_PF_Blur2 [stack 0]
+ Unpremult {
+  inputs 1
+  channels rgb
+  name PF_Unp2
+  xpos 1080
+  ypos 288
+ }
+set N_PF_Unp2 [stack 0]
+ Expression {
+  inputs 1
+  channel0 alpha
+  expr0 "clamp(a*parent.detail)"
+  name PF_Boost2
+  xpos 1080
+  ypos 360
+ }
+set N_PF_Boost2 [stack 0]
+ Premult {
+  inputs 1
+  channels rgb
+  name PF_Pre2
+  xpos 1080
+  ypos 432
+ }
+set N_PF_Pre2 [stack 0]
+push $N_Dot_PF_Under3_31
+push $N_PF_Pre2
+ Merge2 {
+  inputs 2
+  operation under
+  name PF_Under2
+  xpos 1080
+  ypos 936
+ }
+set N_PF_Under2 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_PF_Under2_32
+  xpos 1114
+  ypos 1011
+ }
+set N_Dot_PF_Under2_32 [stack 0]
+push $N_Dot_Dot_Dot_Holed_14_15_16
+ Blur {
+  inputs 1
+  channels rgba
+  size {{parent.fill_scale*4}}
+  name PF_Blur1
+  xpos 940
+  ypos 216
+ }
+set N_PF_Blur1 [stack 0]
+ Unpremult {
+  inputs 1
+  channels rgb
+  name PF_Unp1
+  xpos 940
+  ypos 288
+ }
+set N_PF_Unp1 [stack 0]
+ Expression {
+  inputs 1
+  channel0 alpha
+  expr0 "clamp(a*parent.detail)"
+  name PF_Boost1
+  xpos 940
+  ypos 360
+ }
+set N_PF_Boost1 [stack 0]
+ Premult {
+  inputs 1
+  channels rgb
+  name PF_Pre1
+  xpos 940
+  ypos 432
+ }
+set N_PF_Pre1 [stack 0]
+push $N_Dot_PF_Under2_32
+push $N_PF_Pre1
+ Merge2 {
+  inputs 2
+  operation under
+  name PF_Under1
+  xpos 940
+  ypos 1008
+ }
+set N_PF_Under1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_PF_Under1_33
+  xpos 974
+  ypos 1083
+ }
+set N_Dot_PF_Under1_33 [stack 0]
+push $N_Dot_Dot_Holed_14_15
+ Blur {
+  inputs 1
+  channels rgba
+  size {{parent.fill_scale*2}}
+  name PF_Blur0
+  xpos 800
+  ypos 216
+ }
+set N_PF_Blur0 [stack 0]
+ Unpremult {
+  inputs 1
+  channels rgb
+  name PF_Unp0
+  xpos 800
+  ypos 288
+ }
+set N_PF_Unp0 [stack 0]
+ Expression {
+  inputs 1
+  channel0 alpha
+  expr0 "clamp(a*parent.detail)"
+  name PF_Boost0
+  xpos 800
+  ypos 360
+ }
+set N_PF_Boost0 [stack 0]
+ Premult {
+  inputs 1
+  channels rgb
+  name PF_Pre0
+  xpos 800
+  ypos 432
+ }
+set N_PF_Pre0 [stack 0]
+push $N_Dot_PF_Under1_33
+push $N_PF_Pre0
+ Merge2 {
+  inputs 2
+  operation under
+  name PF_Under0
+  xpos 800
+  ypos 1080
+ }
+set N_PF_Under0 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_PF_Under0_34
+  xpos 834
+  ypos 1155
+ }
+set N_Dot_PF_Under0_34 [stack 0]
+push $N_Holed
+ Merge2 {
+  inputs 2
+  operation under
+  name PF_Original
+  xpos 660
+  ypos 1152
+ }
+set N_PF_Original [stack 0]
+ Dot {
+  inputs 1
+  name Dot_PF_Original_35
+  xpos 694
+  ypos 1191
+ }
+set N_Dot_PF_Original_35 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_PF_Original_35_36
+  xpos 2284
+  ypos 1191
+ }
+set N_Dot_Dot_PF_Original_35_36 [stack 0]
+push $N_Dot_Dot_Dot_plate_8_9_10
+ Blur {
+  inputs 1
+  channels rgb
+  size {{parent.grain_size}}
+  name GrainBlur
+  xpos 2250
+  ypos 72
+ }
+set N_GrainBlur [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_plate_8_9_10_11_12
+push $N_GrainBlur
+ Merge2 {
+  inputs 2
+  operation minus
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name GrainHP
+  xpos 2250
+  ypos 144
+ }
+set N_GrainHP [stack 0]
+ Transform {
+  inputs 1
+  translate {{-parent.grain_offset.x} {-parent.grain_offset.y}}
+  name GrainOffset
+  xpos 2250
+  ypos 216
+ }
+set N_GrainOffset [stack 0]
+ Multiply {
+  inputs 1
+  channels rgb
+  value {{parent.regrain}}
+  name GrainAmount
+  xpos 2250
+  ypos 288
+ }
+set N_GrainAmount [stack 0]
+ Dot {
+  inputs 1
+  name Dot_GrainAmount_37
+  xpos 2284
+  ypos 327
+ }
+set N_Dot_GrainAmount_37 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_GrainAmount_37_38
+  xpos 2354
+  ypos 327
+ }
+set N_Dot_Dot_GrainAmount_37_38 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_GrainAmount_37_38_39
+  xpos 2354
+  ypos 1227
+ }
+set N_Dot_Dot_Dot_GrainAmount_37_38_39 [stack 0]
+push $N_Dot_Dot_PF_Original_35_36
+ Merge2 {
+  inputs 2
+  operation plus
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name AddGrain
+  xpos 2250
+  ypos 1224
+ }
+set N_AddGrain [stack 0]
+ Dot {
+  inputs 1
+  name Dot_AddGrain_40
+  xpos 2284
+  ypos 1299
+ }
+set N_Dot_AddGrain_40 [stack 0]
+push $N_AddGrain
+ Dot {
+  inputs 1
+  name Dot_AddGrain_41
+  xpos 2284
+  ypos 1263
+ }
+set N_Dot_AddGrain_41 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_AddGrain_41_42
+  xpos 104
+  ypos 1263
+ }
+set N_Dot_Dot_AddGrain_41_42 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_AddGrain_41_42_43
+  xpos 104
+  ypos 1443
+ }
+set N_Dot_Dot_Dot_AddGrain_41_42_43 [stack 0]
+push $N_Dot_Dot_GrowMask_3_4
+ Blur {
+  inputs 1
+  channels alpha
+  size {{parent.softness}}
+  name SoftMask
+  xpos 470
+  ypos 144
+ }
+set N_SoftMask [stack 0]
+ Dot {
+  inputs 1
+  name Dot_SoftMask_44
+  xpos 504
+  ypos 191
+ }
+set N_Dot_SoftMask_44 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_SoftMask_44_45
+  xpos 2404
+  ypos 191
+ }
+set N_Dot_Dot_SoftMask_44_45 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_SoftMask_44_45_46
+  xpos 2404
+  ypos 1299
+ }
+set N_Dot_Dot_Dot_SoftMask_44_45_46 [stack 0]
+push $N_Dot_AddGrain_40
+push $N_Dot_Dot_Dot_Dot_Dot_plate_8_9_10_11_13
+ Keymix {
+  inputs 3
+  channels rgb
+  name Blend
+  xpos 2440
+  ypos 1296
+ }
+set N_Blend [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Blend_47
+  xpos 2474
+  ypos 1371
+ }
+set N_Dot_Blend_47 [stack 0]
+push $N_plate
+ Dissolve {
+  inputs 2
+  which {{parent.mix}}
+  name SleepyMix
+  xpos 0
+  ypos 1368
+ }
+set N_SleepyMix [stack 0]
+push $N_Dot_MaskView_7
+push $N_Dot_Dot_Dot_AddGrain_41_42_43
+push $N_SleepyMix
+ Switch {
+  inputs 3
+  which {{parent.view}}
+  name ViewSwitch
+  xpos 0
+  ypos 1440
+ }
+set N_ViewSwitch [stack 0]
+ Output {
+  inputs 1
+  name Output1
+  xpos 0
+  ypos 1512
+ }
+set N_Output1 [stack 0]
+end_group

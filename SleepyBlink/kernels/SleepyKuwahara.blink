@@ -1,0 +1,54 @@
+kernel SleepyKuwahara : ImageComputationKernel<ePixelWise>
+{
+  Image<eRead, eAccessRanged2D, eEdgeClamped> src;
+  Image<eWrite> dst;
+
+param:
+  int radius;
+
+local:
+  int r;
+
+  void define() {
+    defineParam(radius, "radius", 5);
+  }
+
+  void init() {
+    r = clamp(radius, 1, 20);
+    src.setRange(-r, -r, r, r);
+  }
+
+  // mean colour and luminance variance of one quadrant
+  float4 quadrant(int x0, int x1, int y0, int y1) {
+    float3 sum = float3(0.0f);
+    float l1 = 0.0f;
+    float l2 = 0.0f;
+    float n = 0.0f;
+    for (int j = y0; j <= y1; j++) {
+      for (int i = x0; i <= x1; i++) {
+        SampleType(src) p = src(i, j);
+        float l = 0.2126f * p.x + 0.7152f * p.y + 0.0722f * p.z;
+        sum += float3(p.x, p.y, p.z);
+        l1 += l;
+        l2 += l * l;
+        n += 1.0f;
+      }
+    }
+    float3 m = sum / n;
+    float var = l2 / n - (l1 / n) * (l1 / n);
+    return float4(m.x, m.y, m.z, var);
+  }
+
+  // painterly smoothing: each pixel takes the mean of whichever quadrant around it is flattest
+  void process(int2 pos) {
+    float4 q0 = quadrant(-r, 0, 0, r);
+    float4 q1 = quadrant(0, r, 0, r);
+    float4 q2 = quadrant(-r, 0, -r, 0);
+    float4 q3 = quadrant(0, r, -r, 0);
+    float4 best = q0;
+    if (q1.w < best.w) best = q1;
+    if (q2.w < best.w) best = q2;
+    if (q3.w < best.w) best = q3;
+    dst() = float4(best.x, best.y, best.z, src(0, 0).w);
+  }
+};

@@ -1,0 +1,34 @@
+kernel SleepyDirectionalBlur : ImageComputationKernel<ePixelWise>
+{
+  Image<eRead, eAccessRandom, eEdgeClamped> src;
+  Image<eWrite> dst;
+
+param:
+  float blurLength;
+  float angle;
+  int samples;
+  bool oneSided;
+
+  void define() {
+    defineParam(blurLength, "length", 30.0f);
+    defineParam(angle, "angle", 0.0f);
+    defineParam(samples, "samples", 32);
+    defineParam(oneSided, "oneSided", false);
+  }
+
+  // motion-style blur along an angle (degrees); oneSided smears only backwards, like a streak trail
+  void process(int2 pos) {
+    float a = angle * 0.0174533f;
+    float2 dir = float2(cos(a), sin(a));
+    float2 p = float2(pos.x + 0.5f, pos.y + 0.5f);
+    int n = clamp(samples, 2, 256);
+    float4 sum = float4(0.0f);
+    for (int k = 0; k < n; k++) {
+      float t = (float)k / (float)(n - 1);
+      float off = oneSided ? -t * blurLength : (t - 0.5f) * blurLength;
+      float2 q = p + dir * off;
+      sum += bilinear(src, q.x - 0.5f, q.y - 0.5f);
+    }
+    dst() = sum / (float)n;
+  }
+};

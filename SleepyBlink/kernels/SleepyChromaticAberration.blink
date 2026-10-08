@@ -1,0 +1,34 @@
+kernel SleepyChromaticAberration : ImageComputationKernel<ePixelWise>
+{
+  Image<eRead, eAccessRandom, eEdgeClamped> src;
+  Image<eWrite> dst;
+
+param:
+  float amount;
+  float falloff;
+  float2 center;
+
+  void define() {
+    defineParam(amount, "amount", 6.0f);
+    defineParam(falloff, "falloff", 1.5f);
+    defineParam(center, "center", float2(0.5f, 0.5f));
+  }
+
+  // lateral CA: red is pushed outward, blue inward, more towards the corners.
+  // amount = pixel shift at the corner; center is 0-1 of the frame.
+  void process(int2 pos) {
+    float w = (float)src.bounds.width();
+    float h = (float)src.bounds.height();
+    float2 c = float2(src.bounds.x1 + center.x * w, src.bounds.y1 + center.y * h);
+    float2 p = float2(pos.x + 0.5f, pos.y + 0.5f);
+    float2 d = p - c;
+    float len = length(d);
+    float halfDiag = 0.5f * sqrt(w * w + h * h);
+    float2 dir = len > 0.0f ? d / len : float2(0.0f);
+    float shift = amount * pow(clamp(len / halfDiag, 0.0f, 1.0f), falloff);
+    SampleType(src) g = src(pos.x, pos.y);
+    SampleType(src) rs = bilinear(src, p.x - dir.x * shift - 0.5f, p.y - dir.y * shift - 0.5f);
+    SampleType(src) bs = bilinear(src, p.x + dir.x * shift - 0.5f, p.y + dir.y * shift - 0.5f);
+    dst() = float4(rs.x, g.y, bs.z, g.w);
+  }
+};

@@ -1,0 +1,32 @@
+kernel SleepyZoomBlur : ImageComputationKernel<ePixelWise>
+{
+  Image<eRead, eAccessRandom, eEdgeClamped> src;
+  Image<eWrite> dst;
+
+param:
+  float amount;
+  float2 center;
+  int samples;
+
+  void define() {
+    defineParam(amount, "amount", 0.08f);
+    defineParam(center, "center", float2(0.5f, 0.5f));
+    defineParam(samples, "samples", 24);
+  }
+
+  // radial (zoom) blur towards a centre given as 0-1 of the frame
+  void process(int2 pos) {
+    float w = (float)src.bounds.width();
+    float h = (float)src.bounds.height();
+    float2 c = float2(src.bounds.x1 + center.x * w, src.bounds.y1 + center.y * h);
+    float2 p = float2(pos.x + 0.5f, pos.y + 0.5f);
+    int n = clamp(samples, 2, 128);
+    float4 sum = float4(0.0f);
+    for (int k = 0; k < n; k++) {
+      float t = (float)k / (float)(n - 1);
+      float2 q = c + (p - c) * (1.0f - amount * t);
+      sum += bilinear(src, q.x - 0.5f, q.y - 0.5f);
+    }
+    dst() = sum / (float)n;
+  }
+};

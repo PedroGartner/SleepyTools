@@ -1,0 +1,525 @@
+#! C:/Program Files/Nuke13.2v4/nuke-13.2.4.dll -nx
+version 13.2 v4
+Gizmo {
+ tile_color 0xc98a3aff
+ help "Exponential glow: 8 stacked blurs, each twice the size of the last, with weights falling off by 'falloff'. Gives the long natural tail that a single Glow can't.\n\nThe threshold works on luminance, so highlight colour is kept."
+ addUserKnob {20 eg l "Controls"}
+ addUserKnob {26 sleepy_title l "" +STARTLINE T "<b><font size=\"4\">Sleepy ExpoGlow</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v1.0 &middot; Lens</font><br><font color=\"#a8a8a8\">Eight stacked blurs with an exponential falloff for a natural long-tailed glow.</font>"}
+ addUserKnob {26 sleepy_title_div l "" +STARTLINE}
+ addUserKnob {7 threshold t "Only light above this luminance glows." R 0 10}
+ threshold 1
+ addUserKnob {7 size t "Size of the smallest blur. Each layer doubles it." R 0.5 20}
+ size 3
+ addUserKnob {7 falloff t "Weight ratio between layers. Higher = longer, wider tail." R 0.1 1}
+ falloff 0.6
+ addUserKnob {7 exposure l "exposure (stops)" R -6 6}
+ addUserKnob {18 tint}
+ tint {1 1 1}
+ addUserKnob {7 saturation R 0 2}
+ saturation 1
+ addUserKnob {6 glow_only l "glow only" +STARTLINE}
+ addUserKnob {26 sleepy_mix_div l "" +STARTLINE}
+ addUserKnob {7 mix t "Blend between the untouched input (0) and the result (1)."}
+ mix 1
+ addUserKnob {20 sleepy_about l About}
+ addUserKnob {26 sleepy_about_text l "" +STARTLINE T "<b><font size=\"4\">Sleepy ExpoGlow</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v1.0 &middot; Lens &middot; SleepyTools</font><br><br><b>Inputs</b><table><tr><td><b>Input1</b>&nbsp;&nbsp;</td><td>image</td></tr></table><br><b>How it works</b><br>Exponential glow: 8 stacked blurs, each twice the size of the last, with weights falling off by &#x27;falloff&#x27;. Gives the long natural tail that a single Glow can&#x27;t.<br><br>The threshold works on luminance, so highlight colour is kept."}
+}
+ BackdropNode {
+  inputs 0
+  name BD_Threshold
+  tile_color 0x4f3d26ff
+  label "Threshold"
+  note_font_size 24
+  xpos 160
+  ypos 22
+  bdwidth 140
+  bdheight 164
+  z_order 0
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Glow_layers
+  tile_color 0x4f3d26ff
+  label "Glow layers"
+  note_font_size 24
+  xpos 350
+  ypos 166
+  bdwidth 1120
+  bdheight 668
+  z_order 1
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Output
+  tile_color 0x4f3d26ff
+  label "Output"
+  note_font_size 24
+  xpos 1520
+  ypos 814
+  bdwidth 280
+  bdheight 164
+  z_order 2
+ }
+ Input {
+  inputs 0
+  name Input1
+  xpos 0
+  ypos 0
+ }
+set N_Input1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Input1_1
+  xpos 34
+  ypos 39
+ }
+set N_Dot_Input1_1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Input1_1_2
+  xpos 224
+  ypos 39
+ }
+set N_Dot_Dot_Input1_1_2 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Input1_1_2_3
+  xpos 1584
+  ypos 39
+ }
+set N_Dot_Dot_Dot_Input1_1_2_3 [stack 0]
+push $N_Dot_Dot_Input1_1_2
+ Expression {
+  inputs 1
+  expr0 "r*max((0.2126*r+0.7152*g+0.0722*b)-parent.threshold,0)/max((0.2126*r+0.7152*g+0.0722*b),1e-6)"
+  expr1 "g*max((0.2126*r+0.7152*g+0.0722*b)-parent.threshold,0)/max((0.2126*r+0.7152*g+0.0722*b),1e-6)"
+  expr2 "b*max((0.2126*r+0.7152*g+0.0722*b)-parent.threshold,0)/max((0.2126*r+0.7152*g+0.0722*b),1e-6)"
+  name Threshold
+  xpos 190
+  ypos 72
+ }
+set N_Threshold [stack 0]
+ Saturation {
+  inputs 1
+  saturation {{parent.saturation}}
+  name GlowSat
+  xpos 190
+  ypos 144
+ }
+set N_GlowSat [stack 0]
+ Dot {
+  inputs 1
+  name Dot_GlowSat_4
+  xpos 224
+  ypos 183
+ }
+set N_Dot_GlowSat_4 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_GlowSat_4_5
+  xpos 414
+  ypos 183
+ }
+set N_Dot_Dot_GlowSat_4_5 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_GlowSat_4_5_6
+  xpos 554
+  ypos 183
+ }
+set N_Dot_Dot_Dot_GlowSat_4_5_6 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_GlowSat_4_5_6_7
+  xpos 694
+  ypos 183
+ }
+set N_Dot_Dot_Dot_Dot_GlowSat_4_5_6_7 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_GlowSat_4_5_6_7_8
+  xpos 834
+  ypos 183
+ }
+set N_Dot_Dot_Dot_Dot_Dot_GlowSat_4_5_6_7_8 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_GlowSat_4_5_6_7_8_9
+  xpos 974
+  ypos 183
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_GlowSat_4_5_6_7_8_9 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Dot_GlowSat_4_5_6_7_8_9_10
+  xpos 1114
+  ypos 183
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_GlowSat_4_5_6_7_8_9_10 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_GlowSat_4_5_6_7_8_9_10_11
+  xpos 1254
+  ypos 183
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_GlowSat_4_5_6_7_8_9_10_11 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_GlowSat_4_5_6_7_8_9_10_11_12
+  xpos 1394
+  ypos 183
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_GlowSat_4_5_6_7_8_9_10_11_12 [stack 0]
+push $N_Dot_Dot_GlowSat_4_5
+ Blur {
+  inputs 1
+  channels rgb
+  size {{parent.size*1}}
+  name Layer0
+  xpos 380
+  ypos 216
+ }
+set N_Layer0 [stack 0]
+ Multiply {
+  inputs 1
+  channels rgb
+  value {{pow(parent.falloff,0)}}
+  name Weight0
+  xpos 380
+  ypos 288
+ }
+set N_Weight0 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_GlowSat_4_5_6_7_8_9_10_11_12
+ Blur {
+  inputs 1
+  channels rgb
+  size {{parent.size*2}}
+  name Layer1
+  xpos 1360
+  ypos 216
+ }
+set N_Layer1 [stack 0]
+ Multiply {
+  inputs 1
+  channels rgb
+  value {{pow(parent.falloff,1)}}
+  name Weight1
+  xpos 1360
+  ypos 288
+ }
+set N_Weight1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Weight1_13
+  xpos 1394
+  ypos 363
+ }
+set N_Dot_Weight1_13 [stack 0]
+push $N_Weight0
+ Merge2 {
+  inputs 2
+  operation plus
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name Sum1
+  xpos 380
+  ypos 360
+ }
+set N_Sum1 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_GlowSat_4_5_6_7_8_9_10_11
+ Blur {
+  inputs 1
+  channels rgb
+  size {{parent.size*4}}
+  name Layer2
+  xpos 1220
+  ypos 216
+ }
+set N_Layer2 [stack 0]
+ Multiply {
+  inputs 1
+  channels rgb
+  value {{pow(parent.falloff,2)}}
+  name Weight2
+  xpos 1220
+  ypos 288
+ }
+set N_Weight2 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Weight2_14
+  xpos 1254
+  ypos 435
+ }
+set N_Dot_Weight2_14 [stack 0]
+push $N_Sum1
+ Merge2 {
+  inputs 2
+  operation plus
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name Sum2
+  xpos 380
+  ypos 432
+ }
+set N_Sum2 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_GlowSat_4_5_6_7_8_9_10
+ Blur {
+  inputs 1
+  channels rgb
+  size {{parent.size*8}}
+  name Layer3
+  xpos 1080
+  ypos 216
+ }
+set N_Layer3 [stack 0]
+ Multiply {
+  inputs 1
+  channels rgb
+  value {{pow(parent.falloff,3)}}
+  name Weight3
+  xpos 1080
+  ypos 288
+ }
+set N_Weight3 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Weight3_15
+  xpos 1114
+  ypos 507
+ }
+set N_Dot_Weight3_15 [stack 0]
+push $N_Sum2
+ Merge2 {
+  inputs 2
+  operation plus
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name Sum3
+  xpos 380
+  ypos 504
+ }
+set N_Sum3 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_GlowSat_4_5_6_7_8_9
+ Blur {
+  inputs 1
+  channels rgb
+  size {{parent.size*16}}
+  name Layer4
+  xpos 940
+  ypos 216
+ }
+set N_Layer4 [stack 0]
+ Multiply {
+  inputs 1
+  channels rgb
+  value {{pow(parent.falloff,4)}}
+  name Weight4
+  xpos 940
+  ypos 288
+ }
+set N_Weight4 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Weight4_16
+  xpos 974
+  ypos 579
+ }
+set N_Dot_Weight4_16 [stack 0]
+push $N_Sum3
+ Merge2 {
+  inputs 2
+  operation plus
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name Sum4
+  xpos 380
+  ypos 576
+ }
+set N_Sum4 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_GlowSat_4_5_6_7_8
+ Blur {
+  inputs 1
+  channels rgb
+  size {{parent.size*32}}
+  name Layer5
+  xpos 800
+  ypos 216
+ }
+set N_Layer5 [stack 0]
+ Multiply {
+  inputs 1
+  channels rgb
+  value {{pow(parent.falloff,5)}}
+  name Weight5
+  xpos 800
+  ypos 288
+ }
+set N_Weight5 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Weight5_17
+  xpos 834
+  ypos 651
+ }
+set N_Dot_Weight5_17 [stack 0]
+push $N_Sum4
+ Merge2 {
+  inputs 2
+  operation plus
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name Sum5
+  xpos 380
+  ypos 648
+ }
+set N_Sum5 [stack 0]
+push $N_Dot_Dot_Dot_Dot_GlowSat_4_5_6_7
+ Blur {
+  inputs 1
+  channels rgb
+  size {{parent.size*64}}
+  name Layer6
+  xpos 660
+  ypos 216
+ }
+set N_Layer6 [stack 0]
+ Multiply {
+  inputs 1
+  channels rgb
+  value {{pow(parent.falloff,6)}}
+  name Weight6
+  xpos 660
+  ypos 288
+ }
+set N_Weight6 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Weight6_18
+  xpos 694
+  ypos 723
+ }
+set N_Dot_Weight6_18 [stack 0]
+push $N_Sum5
+ Merge2 {
+  inputs 2
+  operation plus
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name Sum6
+  xpos 380
+  ypos 720
+ }
+set N_Sum6 [stack 0]
+push $N_Dot_Dot_Dot_GlowSat_4_5_6
+ Blur {
+  inputs 1
+  channels rgb
+  size {{parent.size*128}}
+  name Layer7
+  xpos 520
+  ypos 216
+ }
+set N_Layer7 [stack 0]
+ Multiply {
+  inputs 1
+  channels rgb
+  value {{pow(parent.falloff,7)}}
+  name Weight7
+  xpos 520
+  ypos 288
+ }
+set N_Weight7 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Weight7_19
+  xpos 554
+  ypos 795
+ }
+set N_Dot_Weight7_19 [stack 0]
+push $N_Sum6
+ Merge2 {
+  inputs 2
+  operation plus
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name Sum7
+  xpos 380
+  ypos 792
+ }
+set N_Sum7 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Sum7_20
+  xpos 414
+  ypos 831
+ }
+set N_Dot_Sum7_20 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Sum7_20_21
+  xpos 1724
+  ypos 831
+ }
+set N_Dot_Dot_Sum7_20_21 [stack 0]
+ Expression {
+  inputs 1
+  expr0 "r*(parent.falloff>=0.999 ? 1.0/8 : (1-parent.falloff)/(1-pow(parent.falloff,8)))*pow(2,parent.exposure)*parent.tint.r"
+  expr1 "g*(parent.falloff>=0.999 ? 1.0/8 : (1-parent.falloff)/(1-pow(parent.falloff,8)))*pow(2,parent.exposure)*parent.tint.g"
+  expr2 "b*(parent.falloff>=0.999 ? 1.0/8 : (1-parent.falloff)/(1-pow(parent.falloff,8)))*pow(2,parent.exposure)*parent.tint.b"
+  name Normalise
+  xpos 1690
+  ypos 864
+ }
+set N_Normalise [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Normalise_22
+  xpos 1724
+  ypos 939
+ }
+set N_Dot_Normalise_22 [stack 0]
+push $N_Dot_Dot_Dot_Input1_1_2_3
+ MergeExpression {
+  inputs 2
+  expr0 "parent.glow_only ? Ar : Br+Ar"
+  expr1 "parent.glow_only ? Ag : Bg+Ag"
+  expr2 "parent.glow_only ? Ab : Bb+Ab"
+  channel3 alpha
+  expr3 Ba
+  name Comp
+  xpos 1550
+  ypos 936
+ }
+set N_Comp [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Comp_23
+  xpos 1584
+  ypos 1011
+ }
+set N_Dot_Comp_23 [stack 0]
+push $N_Input1
+ Dissolve {
+  inputs 2
+  which {{parent.mix}}
+  name SleepyMix
+  xpos 0
+  ypos 1008
+ }
+set N_SleepyMix [stack 0]
+ Output {
+  inputs 1
+  name Output1
+  xpos 0
+  ypos 1080
+ }
+set N_Output1 [stack 0]
+end_group

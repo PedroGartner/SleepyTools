@@ -1,0 +1,345 @@
+#! C:/Program Files/Nuke13.2v4/nuke-13.2.4.dll -nx
+version 13.2 v4
+Gizmo {
+ tile_color 0x3f9e5aff
+ inputs 3
+ help "Pulls the background's colour into the foreground edges while keeping the foreground's brightness.\n\nv2: colour is blended as a chroma vector instead of in HSV, so reds and magentas no longer flip hue at the wrap point, and FG luminance is preserved exactly. 'view edge mask' shows where it acts."
+ addUserKnob {20 User l "Controls"}
+ addUserKnob {26 sleepy_title l "" +STARTLINE T "<b><font size=\"4\">Smoosh Colours</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v2.0 &middot; Keying</font><br><font color=\"#a8a8a8\">Pulls the background&#x27;s colour into the foreground edges, keeping FG brightness.</font>"}
+ addUserKnob {26 sleepy_title_div l "" +STARTLINE}
+ addUserKnob {26 edge l "<b>Edge</b>"}
+ addUserKnob {41 erodesize l "Edge Detect Size" T EdgeDetect1.erodesize}
+ addUserKnob {41 edge_blur l "Edge Detect Softness" T Blur6.size}
+ addUserKnob {6 usealpha l "use Alpha input" t "Off: edges come from the FG alpha.\nOn: edges come from the Alpha input." +STARTLINE}
+ addUserKnob {26 bg l "<b>Background</b>"}
+ addUserKnob {41 blur_bg l "Blur Background" T Blur5.size}
+ addUserKnob {26 mix l "<b>Mixer Controls</b>"}
+ addUserKnob {7 hue_mix l "Hue Mix" t "How much of the background hue to take (0 = FG hue, 1 = BG hue)."}
+ hue_mix 1
+ addUserKnob {7 sat_mix l "Saturation Mix" t "How much of the background saturation to take."}
+ sat_mix 0.63
+ addUserKnob {41 amount l Amount T Keymix2.mix}
+ addUserKnob {6 view_edge l "view edge mask" +STARTLINE}
+ addUserKnob {20 sleepy_about l About}
+ addUserKnob {26 sleepy_about_text l "" +STARTLINE T "<b><font size=\"4\">Smoosh Colours</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v2.0 &middot; Keying &middot; SleepyTools</font><br><br><b>Inputs</b><table><tr><td><b>FG</b>&nbsp;&nbsp;</td><td>foreground</td></tr><tr><td><b>BG</b>&nbsp;&nbsp;</td><td>background</td></tr><tr><td><b>Alpha</b>&nbsp;&nbsp;</td><td>optional edge matte</td></tr></table><br><b>How it works</b><br>Pulls the background&#x27;s colour into the foreground edges while keeping the foreground&#x27;s brightness.<br><br>v2: colour is blended as a chroma vector instead of in HSV, so reds and magentas no longer flip hue at the wrap point, and FG luminance is preserved exactly. &#x27;view edge mask&#x27; shows where it acts."}
+}
+ BackdropNode {
+  inputs 0
+  name BD_Edge
+  tile_color 0x2f4a36ff
+  label "Edge"
+  note_font_size 24
+  xpos 440
+  ypos 22
+  bdwidth 140
+  bdheight 308
+  z_order 0
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Background_colour
+  tile_color 0x2f4a36ff
+  label "Background colour"
+  note_font_size 24
+  xpos 630
+  ypos 22
+  bdwidth 140
+  bdheight 164
+  z_order 1
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Blend
+  tile_color 0x2f4a36ff
+  label "Blend"
+  note_font_size 24
+  xpos 820
+  ypos 22
+  bdwidth 280
+  bdheight 380
+  z_order 2
+ }
+ Input {
+  inputs 0
+  number 2
+  name Alpha
+  xpos 140
+  ypos 0
+ }
+set N_Alpha [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Alpha_1
+  xpos 174
+  ypos 75
+ }
+set N_Dot_Alpha_1 [stack 0]
+ Input {
+  inputs 0
+  name FG
+  xpos 0
+  ypos 0
+ }
+set N_FG [stack 0]
+ Dot {
+  inputs 1
+  name Dot_FG_2
+  xpos 34
+  ypos 39
+ }
+set N_Dot_FG_2 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_FG_2_3
+  xpos 504
+  ypos 39
+ }
+set N_Dot_Dot_FG_2_3 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_FG_2_3_4
+  xpos 884
+  ypos 39
+ }
+set N_Dot_Dot_Dot_FG_2_3_4 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_FG_2_3_4_5
+  xpos 814
+  ypos 39
+ }
+set N_Dot_Dot_Dot_Dot_FG_2_3_4_5 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_FG_2_3_4_5_6
+  xpos 814
+  ypos 327
+ }
+set N_Dot_Dot_Dot_Dot_Dot_FG_2_3_4_5_6 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_FG_2_3_4_5_6_7
+  xpos 884
+  ypos 327
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_FG_2_3_4_5_6_7 [stack 0]
+push $N_Dot_Dot_Dot_Dot_FG_2_3_4_5
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_FG_2_3_4_5_8
+  xpos 1024
+  ypos 39
+ }
+set N_Dot_Dot_Dot_Dot_Dot_FG_2_3_4_5_8 [stack 0]
+push $N_Dot_Alpha_1
+push $N_Dot_Dot_FG_2_3
+ Switch {
+  inputs 2
+  which {{parent.usealpha}}
+  name UseAlpha
+  xpos 470
+  ypos 72
+ }
+set N_UseAlpha [stack 0]
+ EdgeDetectWrapper {
+  inputs 1
+  channels alpha
+  name EdgeDetect1
+  xpos 470
+  ypos 144
+ }
+set N_EdgeDetect1 [stack 0]
+ Blur {
+  inputs 1
+  channels alpha
+  size 12.2
+  name Blur6
+  xpos 470
+  ypos 216
+ }
+set N_Blur6 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Blur6_9
+  xpos 504
+  ypos 255
+ }
+set N_Dot_Blur6_9 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Blur6_9_10
+  xpos 826
+  ypos 255
+ }
+set N_Dot_Dot_Blur6_9_10 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Blur6_9_10_11
+  xpos 826
+  ypos 363
+ }
+set N_Dot_Dot_Dot_Blur6_9_10_11 [stack 0]
+push $N_Blur6
+ Expression {
+  inputs 1
+  expr0 a
+  expr1 a
+  expr2 a
+  name EdgeView
+  xpos 470
+  ypos 288
+ }
+set N_EdgeView [stack 0]
+ Dot {
+  inputs 1
+  name Dot_EdgeView_12
+  xpos 504
+  ypos 435
+ }
+set N_Dot_EdgeView_12 [stack 0]
+ Input {
+  inputs 0
+  number 1
+  name BG
+  xpos 280
+  ypos 0
+ }
+set N_BG [stack 0]
+ Dot {
+  inputs 1
+  name Dot_BG_13
+  xpos 314
+  ypos 47
+ }
+set N_Dot_BG_13 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_BG_13_14
+  xpos 694
+  ypos 47
+ }
+set N_Dot_Dot_BG_13_14 [stack 0]
+ Blur {
+  inputs 1
+  channels rgb
+  size 14.8
+  name Blur5
+  xpos 660
+  ypos 72
+ }
+set N_Blur5 [stack 0]
+ Expression {
+  inputs 1
+  expr0 "(r-(0.2126*r+0.7152*g+0.0722*b))/max(sqrt((r-(0.2126*r+0.7152*g+0.0722*b))*(r-(0.2126*r+0.7152*g+0.0722*b))+(g-(0.2126*r+0.7152*g+0.0722*b))*(g-(0.2126*r+0.7152*g+0.0722*b))+(b-(0.2126*r+0.7152*g+0.0722*b))*(b-(0.2126*r+0.7152*g+0.0722*b))),1e-6)"
+  expr1 "(g-(0.2126*r+0.7152*g+0.0722*b))/max(sqrt((r-(0.2126*r+0.7152*g+0.0722*b))*(r-(0.2126*r+0.7152*g+0.0722*b))+(g-(0.2126*r+0.7152*g+0.0722*b))*(g-(0.2126*r+0.7152*g+0.0722*b))+(b-(0.2126*r+0.7152*g+0.0722*b))*(b-(0.2126*r+0.7152*g+0.0722*b))),1e-6)"
+  expr2 "(b-(0.2126*r+0.7152*g+0.0722*b))/max(sqrt((r-(0.2126*r+0.7152*g+0.0722*b))*(r-(0.2126*r+0.7152*g+0.0722*b))+(g-(0.2126*r+0.7152*g+0.0722*b))*(g-(0.2126*r+0.7152*g+0.0722*b))+(b-(0.2126*r+0.7152*g+0.0722*b))*(b-(0.2126*r+0.7152*g+0.0722*b))),1e-6)"
+  channel3 alpha
+  expr3 "sqrt((r-(0.2126*r+0.7152*g+0.0722*b))*(r-(0.2126*r+0.7152*g+0.0722*b))+(g-(0.2126*r+0.7152*g+0.0722*b))*(g-(0.2126*r+0.7152*g+0.0722*b))+(b-(0.2126*r+0.7152*g+0.0722*b))*(b-(0.2126*r+0.7152*g+0.0722*b)))"
+  name BG_Chroma
+  xpos 660
+  ypos 144
+ }
+set N_BG_Chroma [stack 0]
+ Dot {
+  inputs 1
+  name Dot_BG_Chroma_15
+  xpos 694
+  ypos 219
+ }
+set N_Dot_BG_Chroma_15 [stack 0]
+push $N_Dot_Dot_Dot_FG_2_3_4
+ Expression {
+  inputs 1
+  expr0 "(r-(0.2126*r+0.7152*g+0.0722*b))/max(sqrt((r-(0.2126*r+0.7152*g+0.0722*b))*(r-(0.2126*r+0.7152*g+0.0722*b))+(g-(0.2126*r+0.7152*g+0.0722*b))*(g-(0.2126*r+0.7152*g+0.0722*b))+(b-(0.2126*r+0.7152*g+0.0722*b))*(b-(0.2126*r+0.7152*g+0.0722*b))),1e-6)"
+  expr1 "(g-(0.2126*r+0.7152*g+0.0722*b))/max(sqrt((r-(0.2126*r+0.7152*g+0.0722*b))*(r-(0.2126*r+0.7152*g+0.0722*b))+(g-(0.2126*r+0.7152*g+0.0722*b))*(g-(0.2126*r+0.7152*g+0.0722*b))+(b-(0.2126*r+0.7152*g+0.0722*b))*(b-(0.2126*r+0.7152*g+0.0722*b))),1e-6)"
+  expr2 "(b-(0.2126*r+0.7152*g+0.0722*b))/max(sqrt((r-(0.2126*r+0.7152*g+0.0722*b))*(r-(0.2126*r+0.7152*g+0.0722*b))+(g-(0.2126*r+0.7152*g+0.0722*b))*(g-(0.2126*r+0.7152*g+0.0722*b))+(b-(0.2126*r+0.7152*g+0.0722*b))*(b-(0.2126*r+0.7152*g+0.0722*b))),1e-6)"
+  channel3 alpha
+  expr3 "sqrt((r-(0.2126*r+0.7152*g+0.0722*b))*(r-(0.2126*r+0.7152*g+0.0722*b))+(g-(0.2126*r+0.7152*g+0.0722*b))*(g-(0.2126*r+0.7152*g+0.0722*b))+(b-(0.2126*r+0.7152*g+0.0722*b))*(b-(0.2126*r+0.7152*g+0.0722*b)))"
+  name FG_Chroma
+  xpos 850
+  ypos 72
+ }
+set N_FG_Chroma [stack 0]
+push $N_Dot_BG_Chroma_15
+push $N_FG_Chroma
+ MergeExpression {
+  inputs 2
+  expr0 "(Ba+(Aa-Ba)*parent.sat_mix)*((1-parent.hue_mix)*Br+parent.hue_mix*Ar)/max(sqrt((((1-parent.hue_mix)*Br+parent.hue_mix*Ar))*(((1-parent.hue_mix)*Br+parent.hue_mix*Ar))+(((1-parent.hue_mix)*Bg+parent.hue_mix*Ag))*(((1-parent.hue_mix)*Bg+parent.hue_mix*Ag))+(((1-parent.hue_mix)*Bb+parent.hue_mix*Ab))*(((1-parent.hue_mix)*Bb+parent.hue_mix*Ab))),1e-6)"
+  expr1 "(Ba+(Aa-Ba)*parent.sat_mix)*((1-parent.hue_mix)*Bg+parent.hue_mix*Ag)/max(sqrt((((1-parent.hue_mix)*Br+parent.hue_mix*Ar))*(((1-parent.hue_mix)*Br+parent.hue_mix*Ar))+(((1-parent.hue_mix)*Bg+parent.hue_mix*Ag))*(((1-parent.hue_mix)*Bg+parent.hue_mix*Ag))+(((1-parent.hue_mix)*Bb+parent.hue_mix*Ab))*(((1-parent.hue_mix)*Bb+parent.hue_mix*Ab))),1e-6)"
+  expr2 "(Ba+(Aa-Ba)*parent.sat_mix)*((1-parent.hue_mix)*Bb+parent.hue_mix*Ab)/max(sqrt((((1-parent.hue_mix)*Br+parent.hue_mix*Ar))*(((1-parent.hue_mix)*Br+parent.hue_mix*Ar))+(((1-parent.hue_mix)*Bg+parent.hue_mix*Ag))*(((1-parent.hue_mix)*Bg+parent.hue_mix*Ag))+(((1-parent.hue_mix)*Bb+parent.hue_mix*Ab))*(((1-parent.hue_mix)*Bb+parent.hue_mix*Ab))),1e-6)"
+  expr3 0
+  name ChromaBlend
+  xpos 850
+  ypos 216
+ }
+set N_ChromaBlend [stack 0]
+ Dot {
+  inputs 1
+  name Dot_ChromaBlend_16
+  xpos 884
+  ypos 291
+ }
+set N_Dot_ChromaBlend_16 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_FG_2_3_4_5_8
+ MergeExpression {
+  inputs 2
+  expr0 "(0.2126*Br+0.7152*Bg+0.0722*Bb)+Ar"
+  expr1 "(0.2126*Br+0.7152*Bg+0.0722*Bb)+Ag"
+  expr2 "(0.2126*Br+0.7152*Bg+0.0722*Bb)+Ab"
+  expr3 Ba
+  name Recombine
+  xpos 990
+  ypos 288
+ }
+set N_Recombine [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Recombine_17
+  xpos 1024
+  ypos 363
+ }
+set N_Dot_Recombine_17 [stack 0]
+push $N_Dot_Dot_Dot_Blur6_9_10_11
+push $N_Dot_Recombine_17
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_FG_2_3_4_5_6_7
+ Keymix {
+  inputs 3
+  channels rgb
+  mix 0.58
+  name Keymix2
+  xpos 850
+  ypos 360
+ }
+set N_Keymix2 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Keymix2_18
+  xpos 884
+  ypos 399
+ }
+set N_Dot_Keymix2_18 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Keymix2_18_19
+  xpos 34
+  ypos 399
+ }
+set N_Dot_Dot_Keymix2_18_19 [stack 0]
+push $N_Dot_EdgeView_12
+push $N_Dot_Dot_Keymix2_18_19
+ Switch {
+  inputs 2
+  which {{parent.view_edge}}
+  name ViewSwitch
+  xpos 0
+  ypos 432
+ }
+set N_ViewSwitch [stack 0]
+ Output {
+  inputs 1
+  name Output1
+  xpos 0
+  ypos 504
+ }
+set N_Output1 [stack 0]
+end_group

@@ -1,0 +1,267 @@
+#! C:/Program Files/Nuke13.2v4/nuke-13.2.4.dll -nx
+version 13.2 v4
+Gizmo {
+ tile_color 0x3f9e5aff
+ inputs 4
+ knobChanged "k = nuke.thisKnob()\nif k.name() == 'inputChange':\n    n = nuke.thisNode()\n    n\['use_mask'].setValue(n.input(3) is not None)\n"
+ help "Additive keyer: transfers the fine detail a hard key loses (hair, smoke, motion blur, shadows) from the plate onto the new background.\n\nInputs: plate, screen (clean plate or a generated clean screen), bg, mask (optional).\nOutput: the BG with plate detail. Put your hard-keyed FG over it.\n\nAdd = BG + (plate - screen). Multiply = BG x (plate / screen), better for shadows and darker detail."
+ addUserKnob {20 ak l "Controls"}
+ addUserKnob {26 sleepy_title l "" +STARTLINE T "<b><font size=\"4\">Sleepy AdditiveKeyer</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v1.0 &middot; Keying</font><br><font color=\"#a8a8a8\">Transfers hair, smoke, blur and shadow detail from the plate onto the new background.</font>"}
+ addUserKnob {26 sleepy_title_div l "" +STARTLINE}
+ addUserKnob {4 method M {"Add (plate - screen)" "Multiply (plate / screen)"}}
+ addUserKnob {7 amount R 0 2}
+ amount 1
+ addUserKnob {7 det_sat l "detail saturation" t "0 = luminance only (usual), 1 = full colour (brings screen colour back)." R 0 1}
+ addUserKnob {7 det_blur l "detail blur" t "Softens the detail to hide noise and grain differences." R 0 5}
+ addUserKnob {4 polarity l "add mode" t "Add method only." M {Both "Brighten only" "Darken only"}}
+ addUserKnob {26 ""}
+ addUserKnob {6 use_mask l "use mask input" t "Ticks itself when you connect that input with the node panel open. Tick it by hand if Nuke did not catch the connection." +STARTLINE}
+ addUserKnob {4 view M {Result Detail}}
+ addUserKnob {20 sleepy_about l About}
+ addUserKnob {26 sleepy_about_text l "" +STARTLINE T "<b><font size=\"4\">Sleepy AdditiveKeyer</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v1.0 &middot; Keying &middot; SleepyTools</font><br><br><b>Inputs</b><table><tr><td><b>plate</b>&nbsp;&nbsp;</td><td>original plate</td></tr><tr><td><b>screen</b>&nbsp;&nbsp;</td><td>clean plate / clean screen</td></tr><tr><td><b>bg</b>&nbsp;&nbsp;</td><td>new background</td></tr><tr><td><b>mask</b>&nbsp;&nbsp;</td><td>optional: limit the effect</td></tr></table><br><b>How it works</b><br>Additive keyer: transfers the fine detail a hard key loses (hair, smoke, motion blur, shadows) from the plate onto the new background.<br><br>Inputs: plate, screen (clean plate or a generated clean screen), bg, mask (optional).<br>Output: the BG with plate detail. Put your hard-keyed FG over it.<br><br>Add = BG + (plate - screen). Multiply = BG x (plate / screen), better for shadows and darker detail."}
+}
+ BackdropNode {
+  inputs 0
+  name BD_Detail
+  tile_color 0x2f4a36ff
+  label "Detail"
+  note_font_size 24
+  xpos 300
+  ypos 22
+  bdwidth 140
+  bdheight 236
+  z_order 0
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Combine
+  tile_color 0x2f4a36ff
+  label "Combine"
+  note_font_size 24
+  xpos 490
+  ypos 238
+  bdwidth 280
+  bdheight 236
+  z_order 1
+ }
+ Input {
+  inputs 0
+  name plate
+  xpos 140
+  ypos 0
+ }
+set N_plate [stack 0]
+ Dot {
+  inputs 1
+  name Dot_plate_1
+  xpos 174
+  ypos 75
+ }
+set N_Dot_plate_1 [stack 0]
+ Input {
+  inputs 0
+  number 1
+  name screen
+  xpos 0
+  ypos 0
+ }
+set N_screen [stack 0]
+ Dot {
+  inputs 1
+  name Dot_screen_2
+  xpos 34
+  ypos 39
+ }
+set N_Dot_screen_2 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_screen_2_3
+  xpos 364
+  ypos 39
+ }
+set N_Dot_Dot_screen_2_3 [stack 0]
+push $N_Dot_plate_1
+push $N_Dot_Dot_screen_2_3
+ MergeExpression {
+  inputs 2
+  expr0 "parent.method==0 ? Ar-Br : Ar/max(Br,1e-4)"
+  expr1 "parent.method==0 ? Ag-Bg : Ag/max(Bg,1e-4)"
+  expr2 "parent.method==0 ? Ab-Bb : Ab/max(Bb,1e-4)"
+  channel3 alpha
+  expr3 0
+  name Detail
+  xpos 330
+  ypos 72
+ }
+set N_Detail [stack 0]
+ Blur {
+  inputs 1
+  channels rgb
+  size {{parent.det_blur}}
+  disable {{parent.det_blur==0}}
+  name DetailBlur
+  xpos 330
+  ypos 144
+ }
+set N_DetailBlur [stack 0]
+ Expression {
+  inputs 1
+  expr0 "parent.method==0 ? (parent.polarity==1 ? max(((0.2126*r+0.7152*g+0.0722*b)+(r-(0.2126*r+0.7152*g+0.0722*b))*parent.det_sat),0) : parent.polarity==2 ? min(((0.2126*r+0.7152*g+0.0722*b)+(r-(0.2126*r+0.7152*g+0.0722*b))*parent.det_sat),0) : ((0.2126*r+0.7152*g+0.0722*b)+(r-(0.2126*r+0.7152*g+0.0722*b))*parent.det_sat))*parent.amount : 1+(((0.2126*r+0.7152*g+0.0722*b)+(r-(0.2126*r+0.7152*g+0.0722*b))*parent.det_sat)-1)*parent.amount"
+  expr1 "parent.method==0 ? (parent.polarity==1 ? max(((0.2126*r+0.7152*g+0.0722*b)+(g-(0.2126*r+0.7152*g+0.0722*b))*parent.det_sat),0) : parent.polarity==2 ? min(((0.2126*r+0.7152*g+0.0722*b)+(g-(0.2126*r+0.7152*g+0.0722*b))*parent.det_sat),0) : ((0.2126*r+0.7152*g+0.0722*b)+(g-(0.2126*r+0.7152*g+0.0722*b))*parent.det_sat))*parent.amount : 1+(((0.2126*r+0.7152*g+0.0722*b)+(g-(0.2126*r+0.7152*g+0.0722*b))*parent.det_sat)-1)*parent.amount"
+  expr2 "parent.method==0 ? (parent.polarity==1 ? max(((0.2126*r+0.7152*g+0.0722*b)+(b-(0.2126*r+0.7152*g+0.0722*b))*parent.det_sat),0) : parent.polarity==2 ? min(((0.2126*r+0.7152*g+0.0722*b)+(b-(0.2126*r+0.7152*g+0.0722*b))*parent.det_sat),0) : ((0.2126*r+0.7152*g+0.0722*b)+(b-(0.2126*r+0.7152*g+0.0722*b))*parent.det_sat))*parent.amount : 1+(((0.2126*r+0.7152*g+0.0722*b)+(b-(0.2126*r+0.7152*g+0.0722*b))*parent.det_sat)-1)*parent.amount"
+  name Shape
+  xpos 330
+  ypos 216
+ }
+set N_Shape [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Shape_4
+  xpos 364
+  ypos 291
+ }
+set N_Dot_Shape_4 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Shape_4_5
+  xpos 364
+  ypos 507
+ }
+set N_Dot_Dot_Shape_4_5 [stack 0]
+ Input {
+  inputs 0
+  number 2
+  name bg
+  xpos 0
+  ypos 216
+ }
+set N_bg [stack 0]
+ Dot {
+  inputs 1
+  name Dot_bg_6
+  xpos 34
+  ypos 255
+ }
+set N_Dot_bg_6 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_bg_6_7
+  xpos 554
+  ypos 255
+ }
+set N_Dot_Dot_bg_6_7 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_bg_6_7_8
+  xpos 694
+  ypos 255
+ }
+set N_Dot_Dot_Dot_bg_6_7_8 [stack 0]
+push $N_Dot_Shape_4
+push $N_Dot_Dot_bg_6_7
+ MergeExpression {
+  inputs 2
+  expr0 "parent.method==0 ? Br+Ar : Br*Ar"
+  expr1 "parent.method==0 ? Bg+Ag : Bg*Ag"
+  expr2 "parent.method==0 ? Bb+Ab : Bb*Ab"
+  channel3 alpha
+  expr3 Ba
+  name Combine
+  xpos 520
+  ypos 288
+ }
+set N_Combine [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Combine_9
+  xpos 554
+  ypos 363
+ }
+set N_Dot_Combine_9 [stack 0]
+ Input {
+  inputs 0
+  number 3
+  name mask
+  xpos 140
+  ypos 288
+ }
+set N_mask [stack 0]
+ Dot {
+  inputs 1
+  name Dot_mask_10
+  xpos 174
+  ypos 327
+ }
+set N_Dot_mask_10 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_mask_10_11
+  xpos 624
+  ypos 327
+ }
+set N_Dot_Dot_mask_10_11 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_mask_10_11_12
+  xpos 624
+  ypos 363
+ }
+set N_Dot_Dot_Dot_mask_10_11_12 [stack 0]
+push $N_Dot_Combine_9
+push $N_Dot_Dot_Dot_bg_6_7_8
+ Keymix {
+  inputs 3
+  channels rgb
+  name MaskMix
+  xpos 660
+  ypos 360
+ }
+set N_MaskMix [stack 0]
+ Dot {
+  inputs 1
+  name Dot_MaskMix_13
+  xpos 694
+  ypos 435
+ }
+set N_Dot_MaskMix_13 [stack 0]
+push $N_Combine
+ Switch {
+  inputs 2
+  which {{parent.use_mask}}
+  name MaskSwitch
+  xpos 520
+  ypos 432
+ }
+set N_MaskSwitch [stack 0]
+ Dot {
+  inputs 1
+  name Dot_MaskSwitch_14
+  xpos 554
+  ypos 471
+ }
+set N_Dot_MaskSwitch_14 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_MaskSwitch_14_15
+  xpos 34
+  ypos 471
+ }
+set N_Dot_Dot_MaskSwitch_14_15 [stack 0]
+push $N_Dot_Dot_Shape_4_5
+push $N_Dot_Dot_MaskSwitch_14_15
+ Switch {
+  inputs 2
+  which {{parent.view}}
+  name ViewSwitch
+  xpos 0
+  ypos 504
+ }
+set N_ViewSwitch [stack 0]
+ Output {
+  inputs 1
+  name Output1
+  xpos 0
+  ypos 576
+ }
+set N_Output1 [stack 0]
+end_group

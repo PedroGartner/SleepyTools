@@ -1,0 +1,219 @@
+#! C:/Program Files/Nuke13.2v4/nuke-13.2.4.dll -nx
+version 13.2 v4
+Gizmo {
+ tile_color 0x7d62b8ff
+ help "Position matte: a soft sphere or box matte from a world-position (P) pass.\n\n1. Pick the P layer.\n2. Set view to 'Position pass' and Ctrl+click the centre colour knob on the spot you want.\n3. Size, rotate and soften. The matte is written into the channel chosen under 'write matte to'."
+ addUserKnob {20 pm l "Controls"}
+ addUserKnob {26 sleepy_title l "" +STARTLINE T "<b><font size=\"4\">Sleepy PMatte</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v1.0 &middot; CG</font><br><font color=\"#a8a8a8\">Soft sphere or box matte from a world-position pass.</font>"}
+ addUserKnob {26 sleepy_title_div l "" +STARTLINE}
+ addUserKnob {41 in1 l "P layer" T Shuf_P.in1}
+ addUserKnob {4 shape M {Sphere Box}}
+ addUserKnob {18 centre l "centre (Ctrl+click on P)" t "Switch view to Position pass, then Ctrl+click here and on the image to sample the world position."}
+ centre {0 0 0}
+ addUserKnob {7 uniform l "uniform size" R 0.01 100}
+ uniform 1
+ addUserKnob {13 scale l size}
+ scale {1 1 1}
+ addUserKnob {13 rotate}
+ addUserKnob {7 falloff t "Soft border as a fraction of the size. 0 = hard edge." R 0 1}
+ falloff 0.3
+ addUserKnob {6 invert +STARTLINE}
+ addUserKnob {26 ""}
+ addUserKnob {41 to0 l "write matte to" T CopyMatte.to0}
+ addUserKnob {4 view M {Result Matte "Position pass"}}
+ addUserKnob {20 sleepy_about l About}
+ addUserKnob {26 sleepy_about_text l "" +STARTLINE T "<b><font size=\"4\">Sleepy PMatte</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v1.0 &middot; CG &middot; SleepyTools</font><br><br><b>Inputs</b><table><tr><td><b>cg</b>&nbsp;&nbsp;</td><td>CG render with a P (position) layer</td></tr></table><br><b>How it works</b><br>Position matte: a soft sphere or box matte from a world-position (P) pass.<br><br>1. Pick the P layer.<br>2. Set view to &#x27;Position pass&#x27; and Ctrl+click the centre colour knob on the spot you want.<br>3. Size, rotate and soften. The matte is written into the channel chosen under &#x27;write matte to&#x27;."}
+}
+ BackdropNode {
+  inputs 0
+  name BD_Matte
+  tile_color 0x3a3150ff
+  label "Matte"
+  note_font_size 24
+  xpos 160
+  ypos 94
+  bdwidth 140
+  bdheight 236
+  z_order 0
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Output
+  tile_color 0x3a3150ff
+  label "Output"
+  note_font_size 24
+  xpos 350
+  ypos 238
+  bdwidth 140
+  bdheight 92
+  z_order 1
+ }
+ Input {
+  inputs 0
+  name cg
+  xpos 0
+  ypos 0
+ }
+set N_cg [stack 0]
+ Dot {
+  inputs 1
+  name Dot_cg_1
+  xpos 34
+  ypos 39
+ }
+set N_Dot_cg_1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_cg_1_2
+  xpos 414
+  ypos 39
+ }
+set N_Dot_Dot_cg_1_2 [stack 0]
+push $N_cg
+ Shuffle2 {
+  inputs 1
+  fromInput1 {{0} B}
+  in1 none
+  fromInput2 {{0} B}
+  mappings "4 black -1 -1 rgba.red 0 0 black -1 -1 rgba.green 0 1 black -1 -1 rgba.blue 0 2 black -1 -1 rgba.alpha 0 3"
+  name Shuf_P
+  xpos 0
+  ypos 72
+ }
+set N_Shuf_P [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Shuf_P_3
+  xpos 34
+  ypos 111
+ }
+set N_Dot_Shuf_P_3 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Shuf_P_3_4
+  xpos 104
+  ypos 111
+ }
+set N_Dot_Dot_Shuf_P_3_4 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Shuf_P_3_4_5
+  xpos 104
+  ypos 363
+ }
+set N_Dot_Dot_Dot_Shuf_P_3_4_5 [stack 0]
+push $N_Dot_Dot_Shuf_P_3_4
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Shuf_P_3_4_6
+  xpos 224
+  ypos 111
+ }
+set N_Dot_Dot_Dot_Shuf_P_3_4_6 [stack 0]
+ Expression {
+  inputs 1
+  temp_name0 dx
+  temp_expr0 "r-parent.centre.r"
+  temp_name1 dy
+  temp_expr1 "g-parent.centre.g"
+  temp_name2 dz
+  temp_expr2 "b-parent.centre.b"
+  expr0 "((dx*cos((parent.rotate.z*pi/180))+dy*sin((parent.rotate.z*pi/180)))*cos((parent.rotate.y*pi/180))-dz*sin((parent.rotate.y*pi/180)))/max((parent.uniform*parent.scale.x),1e-6)"
+  expr1 "((-dx*sin((parent.rotate.z*pi/180))+dy*cos((parent.rotate.z*pi/180)))*cos((parent.rotate.x*pi/180))+((dx*cos((parent.rotate.z*pi/180))+dy*sin((parent.rotate.z*pi/180)))*sin((parent.rotate.y*pi/180))+dz*cos((parent.rotate.y*pi/180)))*sin((parent.rotate.x*pi/180)))/max((parent.uniform*parent.scale.y),1e-6)"
+  expr2 "(-(-dx*sin((parent.rotate.z*pi/180))+dy*cos((parent.rotate.z*pi/180)))*sin((parent.rotate.x*pi/180))+((dx*cos((parent.rotate.z*pi/180))+dy*sin((parent.rotate.z*pi/180)))*sin((parent.rotate.y*pi/180))+dz*cos((parent.rotate.y*pi/180)))*cos((parent.rotate.x*pi/180)))/max((parent.uniform*parent.scale.z),1e-6)"
+  name Local
+  xpos 190
+  ypos 144
+ }
+set N_Local [stack 0]
+ Expression {
+  inputs 1
+  channel0 alpha
+  expr0 "parent.invert ? 1-clamp((1-(parent.shape==0 ? sqrt(r*r+g*g+b*b) : max(abs(r),abs(g),abs(b))))/max(parent.falloff,1e-6)) : clamp((1-(parent.shape==0 ? sqrt(r*r+g*g+b*b) : max(abs(r),abs(g),abs(b))))/max(parent.falloff,1e-6))"
+  name Matte
+  xpos 190
+  ypos 216
+ }
+set N_Matte [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Matte_7
+  xpos 224
+  ypos 255
+ }
+set N_Dot_Matte_7 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Matte_7_8
+  xpos 344
+  ypos 255
+ }
+set N_Dot_Dot_Matte_7_8 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Matte_7_8_9
+  xpos 344
+  ypos 291
+ }
+set N_Dot_Dot_Dot_Matte_7_8_9 [stack 0]
+push $N_Dot_Dot_cg_1_2
+ Copy {
+  inputs 2
+  from0 rgba.alpha
+  to0 rgba.alpha
+  name CopyMatte
+  xpos 380
+  ypos 288
+ }
+set N_CopyMatte [stack 0]
+ Dot {
+  inputs 1
+  name Dot_CopyMatte_10
+  xpos 414
+  ypos 327
+ }
+set N_Dot_CopyMatte_10 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_CopyMatte_10_11
+  xpos 34
+  ypos 327
+ }
+set N_Dot_Dot_CopyMatte_10_11 [stack 0]
+push $N_Matte
+ Expression {
+  inputs 1
+  expr0 a
+  expr1 a
+  expr2 a
+  name MatteView
+  xpos 190
+  ypos 288
+ }
+set N_MatteView [stack 0]
+ Dot {
+  inputs 1
+  name Dot_MatteView_12
+  xpos 224
+  ypos 363
+ }
+set N_Dot_MatteView_12 [stack 0]
+push $N_Dot_Dot_Dot_Shuf_P_3_4_5
+push $N_Dot_MatteView_12
+push $N_Dot_Dot_CopyMatte_10_11
+ Switch {
+  inputs 3
+  which {{parent.view}}
+  name ViewSwitch
+  xpos 0
+  ypos 360
+ }
+set N_ViewSwitch [stack 0]
+ Output {
+  inputs 1
+  name Output1
+  xpos 0
+  ypos 432
+ }
+set N_Output1 [stack 0]
+end_group

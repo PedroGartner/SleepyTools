@@ -1,0 +1,52 @@
+kernel SleepySobelNormals : ImageComputationKernel<ePixelWise>
+{
+  Image<eRead, eAccessRanged2D, eEdgeClamped> src;
+  Image<eWrite> dst;
+
+param:
+  float strength;
+  int spacing;
+  int source;
+  bool invert;
+  bool flipGreen;
+  bool encode;
+
+local:
+  int s;
+
+  void define() {
+    defineParam(strength, "strength", 20.0f);
+    defineParam(spacing, "spacing", 1);
+    defineParam(source, "source", 0);
+    defineParam(invert, "invert", false);
+    defineParam(flipGreen, "flipGreen", false);
+    defineParam(encode, "encode", true);
+  }
+
+  void init() {
+    s = max(1, spacing);
+    src.setRange(-s, -s, s, s);
+  }
+
+  // height at a neighbour: 0 luminance, 1 red, 2 green, 3 blue, 4 alpha
+  float h(int dx, int dy) {
+    SampleType(src) p = src(dx * s, dy * s);
+    float v = 0.2126f * p.x + 0.7152f * p.y + 0.0722f * p.z;
+    if (source == 1) v = p.x;
+    if (source == 2) v = p.y;
+    if (source == 3) v = p.z;
+    if (source == 4) v = p.w;
+    return invert ? 1.0f - v : v;
+  }
+
+  void process(int2 pos) {
+    float gx = (h(1, -1) + 2.0f * h(1, 0) + h(1, 1)) - (h(-1, -1) + 2.0f * h(-1, 0) + h(-1, 1));
+    float gy = (h(-1, 1) + 2.0f * h(0, 1) + h(1, 1)) - (h(-1, -1) + 2.0f * h(0, -1) + h(1, -1));
+    float k = strength / (8.0f * s);
+    gx *= k;
+    gy *= k * (flipGreen ? -1.0f : 1.0f);
+    float3 n = normalize(float3(-gx, -gy, 1.0f));
+    if (encode) n = n * 0.5f + 0.5f;
+    dst() = float4(n.x, n.y, n.z, 1.0f);
+  }
+};

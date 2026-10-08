@@ -1,0 +1,436 @@
+#! C:/Program Files/Nuke13.2v4/nuke-13.2.4.dll -nx
+version 13.2 v4
+Gizmo {
+ tile_color 0xc98a3aff
+ help "Lens realism in one node: distortion, chromatic aberration, edge softening and vignette. Each part is skipped when its amount is 0.\n\nDistortion and CA are pixel offsets applied with IDistort (red, green and blue separately), measured from the lens centre."
+ addUserKnob {20 lk l "Controls"}
+ addUserKnob {26 sleepy_title l "" +STARTLINE T "<b><font size=\"4\">Sleepy LensKit</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v1.0 &middot; Lens</font><br><font color=\"#a8a8a8\">Distortion, chromatic aberration, edge softening and vignette in one node.</font>"}
+ addUserKnob {26 sleepy_title_div l "" +STARTLINE}
+ addUserKnob {26 s1 l "<b>Distortion</b>"}
+ addUserKnob {7 distortion t "Radial distortion (k1). Positive and negative bend lines in opposite directions." R -0.3 0.3}
+ addUserKnob {7 distortion2 l "distortion k2" t "Second-order term, mostly affects the corners." R -0.3 0.3}
+ addUserKnob {12 lens_center l "centre offset" t "Lens centre offset from the frame centre, in pixels."}
+ addUserKnob {26 s2 l "<b>Chromatic aberration</b>"}
+ addUserKnob {7 ca l "CA amount (%)" t "Red and blue are scaled in opposite directions by this percentage at the frame edge." R -2 2}
+ ca 0.15
+ addUserKnob {26 s3 l "<b>Softening</b>"}
+ addUserKnob {7 soften l "edge softness" t "Blur size reached at the corners." R 0 10}
+ addUserKnob {7 soften_falloff l "softness falloff" t "Higher = sharp area extends further out." R 0.5 6}
+ soften_falloff 2
+ addUserKnob {26 s4 l "<b>Vignette</b>"}
+ addUserKnob {7 vignette l "vignette amount" R 0 1}
+ addUserKnob {7 vig_falloff l "vignette falloff" R 0.5 6}
+ vig_falloff 2
+ addUserKnob {26 sleepy_mix_div l "" +STARTLINE}
+ addUserKnob {7 mix t "Blend between the untouched input (0) and the result (1)."}
+ mix 1
+ addUserKnob {20 sleepy_about l About}
+ addUserKnob {26 sleepy_about_text l "" +STARTLINE T "<b><font size=\"4\">Sleepy LensKit</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v1.0 &middot; Lens &middot; SleepyTools</font><br><br><b>Inputs</b><table><tr><td><b>Input1</b>&nbsp;&nbsp;</td><td>image</td></tr></table><br><b>How it works</b><br>Lens realism in one node: distortion, chromatic aberration, edge softening and vignette. Each part is skipped when its amount is 0.<br><br>Distortion and CA are pixel offsets applied with IDistort (red, green and blue separately), measured from the lens centre."}
+}
+ BackdropNode {
+  inputs 0
+  name BD_Red
+  tile_color 0x4f3d26ff
+  label "Red"
+  note_font_size 24
+  xpos 300
+  ypos 22
+  bdwidth 280
+  bdheight 236
+  z_order 0
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Green
+  tile_color 0x4f3d26ff
+  label "Green"
+  note_font_size 24
+  xpos 630
+  ypos 238
+  bdwidth 280
+  bdheight 236
+  z_order 1
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Blue
+  tile_color 0x4f3d26ff
+  label "Blue"
+  note_font_size 24
+  xpos 960
+  ypos 454
+  bdwidth 280
+  bdheight 236
+  z_order 2
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Softening
+  tile_color 0x4f3d26ff
+  label "Softening"
+  note_font_size 24
+  xpos 1290
+  ypos 742
+  bdwidth 420
+  bdheight 164
+  z_order 3
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Vignette
+  tile_color 0x4f3d26ff
+  label "Vignette"
+  note_font_size 24
+  xpos 1760
+  ypos 886
+  bdwidth 140
+  bdheight 92
+  z_order 4
+ }
+ Input {
+  inputs 0
+  name Input1
+  xpos 0
+  ypos 0
+ }
+set N_Input1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Input1_1
+  xpos 34
+  ypos 39
+ }
+set N_Dot_Input1_1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Input1_1_2
+  xpos 364
+  ypos 39
+ }
+set N_Dot_Dot_Input1_1_2 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Input1_1_2_3
+  xpos 504
+  ypos 39
+ }
+set N_Dot_Dot_Dot_Input1_1_2_3 [stack 0]
+ Expression {
+  inputs 1
+  expr0 "(x+0.5-width/2-parent.lens_center.x)*((parent.distortion*((((x+0.5-width/2-parent.lens_center.x))*((x+0.5-width/2-parent.lens_center.x))+((y+0.5-height/2-parent.lens_center.y))*((y+0.5-height/2-parent.lens_center.y)))/((width/2)*(width/2)))+parent.distortion2*((((x+0.5-width/2-parent.lens_center.x))*((x+0.5-width/2-parent.lens_center.x))+((y+0.5-height/2-parent.lens_center.y))*((y+0.5-height/2-parent.lens_center.y)))/((width/2)*(width/2)))*((((x+0.5-width/2-parent.lens_center.x))*((x+0.5-width/2-parent.lens_center.x))+((y+0.5-height/2-parent.lens_center.y))*((y+0.5-height/2-parent.lens_center.y)))/((width/2)*(width/2))))+parent.ca/100)"
+  expr1 "(y+0.5-height/2-parent.lens_center.y)*((parent.distortion*((((x+0.5-width/2-parent.lens_center.x))*((x+0.5-width/2-parent.lens_center.x))+((y+0.5-height/2-parent.lens_center.y))*((y+0.5-height/2-parent.lens_center.y)))/((width/2)*(width/2)))+parent.distortion2*((((x+0.5-width/2-parent.lens_center.x))*((x+0.5-width/2-parent.lens_center.x))+((y+0.5-height/2-parent.lens_center.y))*((y+0.5-height/2-parent.lens_center.y)))/((width/2)*(width/2)))*((((x+0.5-width/2-parent.lens_center.x))*((x+0.5-width/2-parent.lens_center.x))+((y+0.5-height/2-parent.lens_center.y))*((y+0.5-height/2-parent.lens_center.y)))/((width/2)*(width/2))))+parent.ca/100)"
+  expr2 0
+  name UV_r
+  xpos 470
+  ypos 72
+ }
+set N_UV_r [stack 0]
+ Dot {
+  inputs 1
+  name Dot_UV_r_4
+  xpos 504
+  ypos 147
+ }
+set N_Dot_UV_r_4 [stack 0]
+push $N_Dot_Dot_Input1_1_2
+ Copy {
+  inputs 2
+  from0 rgba.red
+  to0 forward.u
+  from1 rgba.green
+  to1 forward.v
+  name UVCopy_r
+  xpos 330
+  ypos 144
+ }
+set N_UVCopy_r [stack 0]
+ IDistort {
+  inputs 1
+  channels {rgba.red -rgba.green -rgba.blue none}
+  uv forward
+  uv_scale 1
+  disable {{"parent.distortion==0 && parent.distortion2==0 && parent.ca==0"}}
+  name Distort_r
+  xpos 330
+  ypos 216
+ }
+set N_Distort_r [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Distort_r_5
+  xpos 364
+  ypos 255
+ }
+set N_Dot_Distort_r_5 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Distort_r_5_6
+  xpos 694
+  ypos 255
+ }
+set N_Dot_Dot_Distort_r_5_6 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Distort_r_5_6_7
+  xpos 834
+  ypos 255
+ }
+set N_Dot_Dot_Dot_Distort_r_5_6_7 [stack 0]
+ Expression {
+  inputs 1
+  expr0 "(x+0.5-width/2-parent.lens_center.x)*((parent.distortion*((((x+0.5-width/2-parent.lens_center.x))*((x+0.5-width/2-parent.lens_center.x))+((y+0.5-height/2-parent.lens_center.y))*((y+0.5-height/2-parent.lens_center.y)))/((width/2)*(width/2)))+parent.distortion2*((((x+0.5-width/2-parent.lens_center.x))*((x+0.5-width/2-parent.lens_center.x))+((y+0.5-height/2-parent.lens_center.y))*((y+0.5-height/2-parent.lens_center.y)))/((width/2)*(width/2)))*((((x+0.5-width/2-parent.lens_center.x))*((x+0.5-width/2-parent.lens_center.x))+((y+0.5-height/2-parent.lens_center.y))*((y+0.5-height/2-parent.lens_center.y)))/((width/2)*(width/2)))))"
+  expr1 "(y+0.5-height/2-parent.lens_center.y)*((parent.distortion*((((x+0.5-width/2-parent.lens_center.x))*((x+0.5-width/2-parent.lens_center.x))+((y+0.5-height/2-parent.lens_center.y))*((y+0.5-height/2-parent.lens_center.y)))/((width/2)*(width/2)))+parent.distortion2*((((x+0.5-width/2-parent.lens_center.x))*((x+0.5-width/2-parent.lens_center.x))+((y+0.5-height/2-parent.lens_center.y))*((y+0.5-height/2-parent.lens_center.y)))/((width/2)*(width/2)))*((((x+0.5-width/2-parent.lens_center.x))*((x+0.5-width/2-parent.lens_center.x))+((y+0.5-height/2-parent.lens_center.y))*((y+0.5-height/2-parent.lens_center.y)))/((width/2)*(width/2)))))"
+  expr2 0
+  name UV_g
+  xpos 800
+  ypos 288
+ }
+set N_UV_g [stack 0]
+ Dot {
+  inputs 1
+  name Dot_UV_g_8
+  xpos 834
+  ypos 363
+ }
+set N_Dot_UV_g_8 [stack 0]
+push $N_Dot_Dot_Distort_r_5_6
+ Copy {
+  inputs 2
+  from0 rgba.red
+  to0 forward.u
+  from1 rgba.green
+  to1 forward.v
+  name UVCopy_g
+  xpos 660
+  ypos 360
+ }
+set N_UVCopy_g [stack 0]
+ IDistort {
+  inputs 1
+  channels {-rgba.red rgba.green -rgba.blue rgba.alpha}
+  uv forward
+  uv_scale 1
+  disable {{"parent.distortion==0 && parent.distortion2==0"}}
+  name Distort_g
+  xpos 660
+  ypos 432
+ }
+set N_Distort_g [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Distort_g_9
+  xpos 694
+  ypos 471
+ }
+set N_Dot_Distort_g_9 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Distort_g_9_10
+  xpos 1024
+  ypos 471
+ }
+set N_Dot_Dot_Distort_g_9_10 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Distort_g_9_10_11
+  xpos 1164
+  ypos 471
+ }
+set N_Dot_Dot_Dot_Distort_g_9_10_11 [stack 0]
+ Expression {
+  inputs 1
+  expr0 "(x+0.5-width/2-parent.lens_center.x)*((parent.distortion*((((x+0.5-width/2-parent.lens_center.x))*((x+0.5-width/2-parent.lens_center.x))+((y+0.5-height/2-parent.lens_center.y))*((y+0.5-height/2-parent.lens_center.y)))/((width/2)*(width/2)))+parent.distortion2*((((x+0.5-width/2-parent.lens_center.x))*((x+0.5-width/2-parent.lens_center.x))+((y+0.5-height/2-parent.lens_center.y))*((y+0.5-height/2-parent.lens_center.y)))/((width/2)*(width/2)))*((((x+0.5-width/2-parent.lens_center.x))*((x+0.5-width/2-parent.lens_center.x))+((y+0.5-height/2-parent.lens_center.y))*((y+0.5-height/2-parent.lens_center.y)))/((width/2)*(width/2))))-parent.ca/100)"
+  expr1 "(y+0.5-height/2-parent.lens_center.y)*((parent.distortion*((((x+0.5-width/2-parent.lens_center.x))*((x+0.5-width/2-parent.lens_center.x))+((y+0.5-height/2-parent.lens_center.y))*((y+0.5-height/2-parent.lens_center.y)))/((width/2)*(width/2)))+parent.distortion2*((((x+0.5-width/2-parent.lens_center.x))*((x+0.5-width/2-parent.lens_center.x))+((y+0.5-height/2-parent.lens_center.y))*((y+0.5-height/2-parent.lens_center.y)))/((width/2)*(width/2)))*((((x+0.5-width/2-parent.lens_center.x))*((x+0.5-width/2-parent.lens_center.x))+((y+0.5-height/2-parent.lens_center.y))*((y+0.5-height/2-parent.lens_center.y)))/((width/2)*(width/2))))-parent.ca/100)"
+  expr2 0
+  name UV_b
+  xpos 1130
+  ypos 504
+ }
+set N_UV_b [stack 0]
+ Dot {
+  inputs 1
+  name Dot_UV_b_12
+  xpos 1164
+  ypos 579
+ }
+set N_Dot_UV_b_12 [stack 0]
+push $N_Dot_Dot_Distort_g_9_10
+ Copy {
+  inputs 2
+  from0 rgba.red
+  to0 forward.u
+  from1 rgba.green
+  to1 forward.v
+  name UVCopy_b
+  xpos 990
+  ypos 576
+ }
+set N_UVCopy_b [stack 0]
+ IDistort {
+  inputs 1
+  channels {-rgba.red -rgba.green rgba.blue none}
+  uv forward
+  uv_scale 1
+  disable {{"parent.distortion==0 && parent.distortion2==0 && parent.ca==0"}}
+  name Distort_b
+  xpos 990
+  ypos 648
+ }
+set N_Distort_b [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Distort_b_13
+  xpos 1024
+  ypos 687
+ }
+set N_Dot_Distort_b_13 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Distort_b_13_14
+  xpos 174
+  ypos 687
+ }
+set N_Dot_Dot_Distort_b_13_14 [stack 0]
+ Remove {
+  inputs 1
+  channels forward
+  name RemoveUV
+  xpos 140
+  ypos 720
+ }
+set N_RemoveUV [stack 0]
+ Dot {
+  inputs 1
+  name Dot_RemoveUV_15
+  xpos 174
+  ypos 759
+ }
+set N_Dot_RemoveUV_15 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_RemoveUV_15_16
+  xpos 1354
+  ypos 759
+ }
+set N_Dot_Dot_RemoveUV_15_16 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_RemoveUV_15_16_17
+  xpos 1494
+  ypos 759
+ }
+set N_Dot_Dot_Dot_RemoveUV_15_16_17 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_RemoveUV_15_16_17_18
+  xpos 1634
+  ypos 759
+ }
+set N_Dot_Dot_Dot_Dot_RemoveUV_15_16_17_18 [stack 0]
+push $N_Dot_Dot_Dot_RemoveUV_15_16_17
+ Blur {
+  inputs 1
+  channels rgba
+  size {{parent.soften}}
+  name SoftBlur
+  xpos 1460
+  ypos 792
+ }
+set N_SoftBlur [stack 0]
+ Dot {
+  inputs 1
+  name Dot_SoftBlur_19
+  xpos 1494
+  ypos 867
+ }
+set N_Dot_SoftBlur_19 [stack 0]
+push $N_Dot_Dot_Dot_Dot_RemoveUV_15_16_17_18
+ Expression {
+  inputs 1
+  channel0 alpha
+  expr0 "clamp(pow(((((x+0.5-width/2-parent.lens_center.x))*((x+0.5-width/2-parent.lens_center.x))+((y+0.5-height/2-parent.lens_center.y))*((y+0.5-height/2-parent.lens_center.y)))/((width/2)*(width/2)+(height/2)*(height/2))),parent.soften_falloff))"
+  name SoftMask
+  xpos 1600
+  ypos 792
+ }
+set N_SoftMask [stack 0]
+ Dot {
+  inputs 1
+  name Dot_SoftMask_20
+  xpos 1634
+  ypos 831
+ }
+set N_Dot_SoftMask_20 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_SoftMask_20_21
+  xpos 1424
+  ypos 831
+ }
+set N_Dot_Dot_SoftMask_20_21 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_SoftMask_20_21_22
+  xpos 1424
+  ypos 867
+ }
+set N_Dot_Dot_Dot_SoftMask_20_21_22 [stack 0]
+push $N_Dot_SoftBlur_19
+push $N_Dot_Dot_RemoveUV_15_16
+ Keymix {
+  inputs 3
+  disable {{parent.soften==0}}
+  name Soften
+  xpos 1320
+  ypos 864
+ }
+set N_Soften [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Soften_23
+  xpos 1354
+  ypos 903
+ }
+set N_Dot_Soften_23 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Soften_23_24
+  xpos 1824
+  ypos 903
+ }
+set N_Dot_Dot_Soften_23_24 [stack 0]
+ Expression {
+  inputs 1
+  disable {{parent.vignette==0}}
+  expr0 "r*(1-parent.vignette*clamp(pow(((((x+0.5-width/2-parent.lens_center.x))*((x+0.5-width/2-parent.lens_center.x))+((y+0.5-height/2-parent.lens_center.y))*((y+0.5-height/2-parent.lens_center.y)))/((width/2)*(width/2)+(height/2)*(height/2))),parent.vig_falloff)))"
+  expr1 "g*(1-parent.vignette*clamp(pow(((((x+0.5-width/2-parent.lens_center.x))*((x+0.5-width/2-parent.lens_center.x))+((y+0.5-height/2-parent.lens_center.y))*((y+0.5-height/2-parent.lens_center.y)))/((width/2)*(width/2)+(height/2)*(height/2))),parent.vig_falloff)))"
+  expr2 "b*(1-parent.vignette*clamp(pow(((((x+0.5-width/2-parent.lens_center.x))*((x+0.5-width/2-parent.lens_center.x))+((y+0.5-height/2-parent.lens_center.y))*((y+0.5-height/2-parent.lens_center.y)))/((width/2)*(width/2)+(height/2)*(height/2))),parent.vig_falloff)))"
+  name Vignette
+  xpos 1790
+  ypos 936
+ }
+set N_Vignette [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Vignette_25
+  xpos 1824
+  ypos 1011
+ }
+set N_Dot_Vignette_25 [stack 0]
+push $N_Input1
+ Dissolve {
+  inputs 2
+  which {{parent.mix}}
+  name SleepyMix
+  xpos 0
+  ypos 1008
+ }
+set N_SleepyMix [stack 0]
+ Output {
+  inputs 1
+  name Output1
+  xpos 0
+  ypos 1080
+ }
+set N_Output1 [stack 0]
+end_group

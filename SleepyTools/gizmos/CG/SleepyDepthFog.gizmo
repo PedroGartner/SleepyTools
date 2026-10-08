@@ -1,0 +1,143 @@
+#! C:/Program Files/Nuke13.2v4/nuke-13.2.4.dll -nx
+version 13.2 v4
+Gizmo {
+ tile_color 0x7d62b8ff
+ help "Depth fog: haze that builds up between 'near' and 'far' using a depth channel.\n\nDensity shapes the build-up (0 = linear, higher = thickens quickly then levels off). Choose 1/Z for depth from Nuke's ScanlineRender, Distance for most renderers."
+ addUserKnob {20 df l "Controls"}
+ addUserKnob {26 sleepy_title l "" +STARTLINE T "<b><font size=\"4\">Sleepy DepthFog</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v1.0 &middot; CG</font><br><font color=\"#a8a8a8\">Haze between near and far from any depth channel.</font>"}
+ addUserKnob {26 sleepy_title_div l "" +STARTLINE}
+ addUserKnob {41 from0 l "depth from" T DepthIn.from0}
+ addUserKnob {4 convention M {"Distance (Z)" "1/Z (ScanlineRender)"}}
+ addUserKnob {6 zero_far l "depth 0 = far (sky)" +STARTLINE}
+ zero_far true
+ addUserKnob {7 near R 0 1000}
+ addUserKnob {7 far R 0 10000}
+ far 100
+ addUserKnob {7 density R 0 10}
+ density 2
+ addUserKnob {18 fog_colour l "fog colour"}
+ fog_colour {0.6 0.65 0.7}
+ addUserKnob {7 amount}
+ amount 1
+ addUserKnob {6 premult_fog l "fog only where alpha" t "On for premultiplied CG elements: fog colour is scaled by alpha so it can be merged over." +STARTLINE}
+ premult_fog true
+ addUserKnob {4 view M {Result "Fog matte"}}
+ addUserKnob {26 sleepy_mix_div l "" +STARTLINE}
+ addUserKnob {7 mix t "Blend between the untouched input (0) and the result (1)."}
+ mix 1
+ addUserKnob {20 sleepy_about l About}
+ addUserKnob {26 sleepy_about_text l "" +STARTLINE T "<b><font size=\"4\">Sleepy DepthFog</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v1.0 &middot; CG &middot; SleepyTools</font><br><br><b>Inputs</b><table><tr><td><b>cg</b>&nbsp;&nbsp;</td><td>image with a depth channel</td></tr></table><br><b>How it works</b><br>Depth fog: haze that builds up between &#x27;near&#x27; and &#x27;far&#x27; using a depth channel.<br><br>Density shapes the build-up (0 = linear, higher = thickens quickly then levels off). Choose 1/Z for depth from Nuke&#x27;s ScanlineRender, Distance for most renderers."}
+}
+ BackdropNode {
+  inputs 0
+  name BD_Fog
+  tile_color 0x3a3150ff
+  label "Fog"
+  note_font_size 24
+  xpos 160
+  ypos 22
+  bdwidth 280
+  bdheight 236
+  z_order 0
+ }
+ Input {
+  inputs 0
+  name cg
+  xpos 0
+  ypos 0
+ }
+set N_cg [stack 0]
+ Dot {
+  inputs 1
+  name Dot_cg_1
+  xpos 34
+  ypos 75
+ }
+set N_Dot_cg_1 [stack 0]
+push $N_cg
+ Dot {
+  inputs 1
+  name Dot_cg_2
+  xpos 34
+  ypos 39
+ }
+set N_Dot_cg_2 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_cg_2_3
+  xpos 224
+  ypos 39
+ }
+set N_Dot_Dot_cg_2_3 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_cg_2_3_4
+  xpos 364
+  ypos 39
+ }
+set N_Dot_Dot_Dot_cg_2_3_4 [stack 0]
+push $N_Dot_cg_1
+push $N_Dot_Dot_Dot_cg_2_3_4
+ Copy {
+  inputs 2
+  from0 depth.Z
+  to0 rgba.red
+  name DepthIn
+  xpos 330
+  ypos 72
+ }
+set N_DepthIn [stack 0]
+ Expression {
+  inputs 1
+  expr0 "(parent.density<0.001 ? clamp(((r<=0 && parent.zero_far ? 1e9 : (parent.convention==1 ? 1/max(r,1e-9) : r))-parent.near)/max(parent.far-parent.near,1e-6)) : (1-exp(-parent.density*clamp(((r<=0 && parent.zero_far ? 1e9 : (parent.convention==1 ? 1/max(r,1e-9) : r))-parent.near)/max(parent.far-parent.near,1e-6))))/(1-exp(-parent.density)))*parent.amount"
+  expr1 0
+  expr2 0
+  name FogAmount
+  xpos 330
+  ypos 144
+ }
+set N_FogAmount [stack 0]
+ Dot {
+  inputs 1
+  name Dot_FogAmount_5
+  xpos 364
+  ypos 219
+ }
+set N_Dot_FogAmount_5 [stack 0]
+push $N_Dot_Dot_cg_2_3
+ MergeExpression {
+  inputs 2
+  expr0 "parent.view==1 ? Ar : Br*(1-Ar)+parent.fog_colour.r*Ar*(parent.premult_fog ? Ba : 1)"
+  expr1 "parent.view==1 ? Ar : Bg*(1-Ar)+parent.fog_colour.g*Ar*(parent.premult_fog ? Ba : 1)"
+  expr2 "parent.view==1 ? Ar : Bb*(1-Ar)+parent.fog_colour.b*Ar*(parent.premult_fog ? Ba : 1)"
+  channel3 alpha
+  expr3 Ba
+  name Fog
+  xpos 190
+  ypos 216
+ }
+set N_Fog [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Fog_6
+  xpos 224
+  ypos 291
+ }
+set N_Dot_Fog_6 [stack 0]
+push $N_cg
+ Dissolve {
+  inputs 2
+  which {{parent.mix}}
+  name SleepyMix
+  xpos 0
+  ypos 288
+ }
+set N_SleepyMix [stack 0]
+ Output {
+  inputs 1
+  name Output1
+  xpos 0
+  ypos 360
+ }
+set N_Output1 [stack 0]
+end_group

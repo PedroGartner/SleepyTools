@@ -1,0 +1,241 @@
+#! C:/Program Files/Nuke13.2v4/nuke-13.2.4.dll -nx
+version 13.2 v4
+Gizmo {
+ tile_color 0xc98a3aff
+ inputs 2
+ knobChanged "k = nuke.thisKnob()\nif k.name() == 'inputChange':\n    n = nuke.thisNode()\n    n\['use_mask'].setValue(n.input(1) is not None)\n"
+ help "Heat haze: animated noise distortion that rises over time. Use the mask input (alpha) to limit it, e.g. above a road or behind an exhaust. Without a mask it covers the frame."
+ addUserKnob {20 hh l "Controls"}
+ addUserKnob {26 sleepy_title l "" +STARTLINE T "<b><font size=\"4\">Sleepy HeatHaze</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v1.0 &middot; Lens</font><br><font color=\"#a8a8a8\">Rising, boiling noise distortion, optionally masked.</font>"}
+ addUserKnob {26 sleepy_title_div l "" +STARTLINE}
+ addUserKnob {7 strength l "strength (px)" R 0 30}
+ strength 4
+ addUserKnob {7 size l "ripple size" R 2 200}
+ size 30
+ addUserKnob {7 speed l "boil speed" t "How fast the pattern changes." R 0 0.5}
+ speed 0.08
+ addUserKnob {7 rise l "rise (px/frame)" t "Upward drift of the pattern." R -10 10}
+ rise 2
+ addUserKnob {3 octaves}
+ octaves 3
+ addUserKnob {26 ""}
+ addUserKnob {6 use_mask l "use mask input" t "Ticks itself when you connect that input with the node panel open. Tick it by hand if Nuke did not catch the connection." +STARTLINE}
+ addUserKnob {6 invert l "invert mask" -STARTLINE}
+ addUserKnob {4 view M {Result "Distortion field"}}
+ addUserKnob {26 sleepy_mix_div l "" +STARTLINE}
+ addUserKnob {7 mix t "Blend between the untouched input (0) and the result (1)."}
+ mix 1
+ addUserKnob {20 sleepy_about l About}
+ addUserKnob {26 sleepy_about_text l "" +STARTLINE T "<b><font size=\"4\">Sleepy HeatHaze</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v1.0 &middot; Lens &middot; SleepyTools</font><br><br><b>Inputs</b><table><tr><td><b>Input1</b>&nbsp;&nbsp;</td><td>image</td></tr><tr><td><b>mask</b>&nbsp;&nbsp;</td><td>optional: where the haze is</td></tr></table><br><b>How it works</b><br>Heat haze: animated noise distortion that rises over time. Use the mask input (alpha) to limit it, e.g. above a road or behind an exhaust. Without a mask it covers the frame."}
+}
+ BackdropNode {
+  inputs 0
+  name BD_Noise_field
+  tile_color 0x4f3d26ff
+  label "Noise field"
+  note_font_size 24
+  xpos 300
+  ypos 22
+  bdwidth 140
+  bdheight 308
+  z_order 0
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Distort
+  tile_color 0x4f3d26ff
+  label "Distort"
+  note_font_size 24
+  xpos 490
+  ypos 238
+  bdwidth 140
+  bdheight 236
+  z_order 1
+ }
+ Input {
+  inputs 0
+  name Input1
+  xpos 0
+  ypos 0
+ }
+set N_Input1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Input1_1
+  xpos 34
+  ypos 39
+ }
+set N_Dot_Input1_1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Input1_1_2
+  xpos 364
+  ypos 39
+ }
+set N_Dot_Dot_Input1_1_2 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Input1_1_2_3
+  xpos 554
+  ypos 39
+ }
+set N_Dot_Dot_Dot_Input1_1_2_3 [stack 0]
+push $N_Dot_Dot_Input1_1_2
+ Noise {
+  inputs 1
+  output {rgba.red -rgba.green -rgba.blue -rgba.alpha}
+  cliptype none
+  replace true
+  size {{parent.size}}
+  zoffset {{frame*parent.speed}}
+  octaves {{parent.octaves}}
+  translate {0 {-frame*parent.rise}}
+  name NoiseU
+  xpos 330
+  ypos 72
+ }
+set N_NoiseU [stack 0]
+ Noise {
+  inputs 1
+  output {-rgba.red rgba.green -rgba.blue -rgba.alpha}
+  cliptype none
+  replace true
+  size {{parent.size}}
+  zoffset {{frame*parent.speed+37.3}}
+  octaves {{parent.octaves}}
+  translate {0 {-frame*parent.rise}}
+  name NoiseV
+  xpos 330
+  ypos 144
+ }
+set N_NoiseV [stack 0]
+ Input {
+  inputs 0
+  number 1
+  name mask
+  xpos 140
+  ypos 144
+ }
+set N_mask [stack 0]
+ Dot {
+  inputs 1
+  name Dot_mask_4
+  xpos 174
+  ypos 219
+ }
+set N_Dot_mask_4 [stack 0]
+push $N_NoiseV
+ MergeExpression {
+  inputs 2
+  expr0 "(Br-0.5)*2*parent.strength*(parent.use_mask ? (parent.invert ? 1-clamp(Aa) : clamp(Aa)) : 1)"
+  expr1 "(Bg-0.5)*2*parent.strength*(parent.use_mask ? (parent.invert ? 1-clamp(Aa) : clamp(Aa)) : 1)"
+  expr2 0
+  name Field
+  xpos 330
+  ypos 216
+ }
+set N_Field [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Field_5
+  xpos 364
+  ypos 255
+ }
+set N_Dot_Field_5 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Field_5_6
+  xpos 484
+  ypos 255
+ }
+set N_Dot_Dot_Field_5_6 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Field_5_6_7
+  xpos 484
+  ypos 291
+ }
+set N_Dot_Dot_Dot_Field_5_6_7 [stack 0]
+push $N_Dot_Dot_Dot_Input1_1_2_3
+ Copy {
+  inputs 2
+  from0 rgba.red
+  to0 forward.u
+  from1 rgba.green
+  to1 forward.v
+  name UVCopy
+  xpos 520
+  ypos 288
+ }
+set N_UVCopy [stack 0]
+ IDistort {
+  inputs 1
+  channels rgba
+  uv forward
+  uv_scale 1
+  name Distort
+  xpos 520
+  ypos 360
+ }
+set N_Distort [stack 0]
+ Remove {
+  inputs 1
+  channels forward
+  name RemoveUV
+  xpos 520
+  ypos 432
+ }
+set N_RemoveUV [stack 0]
+ Dot {
+  inputs 1
+  name Dot_RemoveUV_8
+  xpos 554
+  ypos 507
+ }
+set N_Dot_RemoveUV_8 [stack 0]
+push $N_Field
+ Expression {
+  inputs 1
+  expr0 "r/max(parent.strength,1e-6)*0.5+0.5"
+  expr1 "g/max(parent.strength,1e-6)*0.5+0.5"
+  expr2 0.5
+  name FieldView
+  xpos 330
+  ypos 288
+ }
+set N_FieldView [stack 0]
+ Dot {
+  inputs 1
+  name Dot_FieldView_9
+  xpos 364
+  ypos 579
+ }
+set N_Dot_FieldView_9 [stack 0]
+push $N_Dot_RemoveUV_8
+push $N_Input1
+ Dissolve {
+  inputs 2
+  which {{parent.mix}}
+  name SleepyMix
+  xpos 0
+  ypos 504
+ }
+set N_SleepyMix [stack 0]
+push $N_Dot_FieldView_9
+push $N_SleepyMix
+ Switch {
+  inputs 2
+  which {{parent.view}}
+  name ViewSwitch
+  xpos 0
+  ypos 576
+ }
+set N_ViewSwitch [stack 0]
+ Output {
+  inputs 1
+  name Output1
+  xpos 0
+  ypos 648
+ }
+set N_Output1 [stack 0]
+end_group

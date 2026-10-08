@@ -1,0 +1,1420 @@
+#! C:/Program Files/Nuke13.2v4/nuke-13.2.4.dll -nx
+version 13.2 v4
+Gizmo {
+ tile_color 0x7d62b8ff
+ help "Rebuild and grade up to 8 light AOVs in one node.\n\nPick a layer per slot, give it a gain, or mute it. 'Result' keeps the beauty and only adds the changes you made (beauty - original slots + graded slots), so anything you didn't pick stays exactly as rendered.\n'Difference' shows beauty minus the plain sum of the slots: if your slots are all the light AOVs it should be black, which checks the AOVs add up to the beauty."
+ addUserKnob {20 ar l "Controls"}
+ addUserKnob {26 sleepy_title l "" +STARTLINE T "<b><font size=\"4\">Sleepy AOVRebuild</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v1.0 &middot; CG</font><br><font color=\"#a8a8a8\">Grade or mute up to 8 light AOVs and check that they add up to the beauty.</font>"}
+ addUserKnob {26 sleepy_title_div l "" +STARTLINE}
+ addUserKnob {41 aov_1 l "AOV 1" T Shuf_1.in1}
+ addUserKnob {6 mute_1 l mute -STARTLINE}
+ addUserKnob {41 gain_1 l gain T Grade_1.white}
+ addUserKnob {41 aov_2 l "AOV 2" T Shuf_2.in1}
+ addUserKnob {6 mute_2 l mute -STARTLINE}
+ addUserKnob {41 gain_2 l gain T Grade_2.white}
+ addUserKnob {41 aov_3 l "AOV 3" T Shuf_3.in1}
+ addUserKnob {6 mute_3 l mute -STARTLINE}
+ addUserKnob {41 gain_3 l gain T Grade_3.white}
+ addUserKnob {41 aov_4 l "AOV 4" T Shuf_4.in1}
+ addUserKnob {6 mute_4 l mute -STARTLINE}
+ addUserKnob {41 gain_4 l gain T Grade_4.white}
+ addUserKnob {41 aov_5 l "AOV 5" T Shuf_5.in1}
+ addUserKnob {6 mute_5 l mute -STARTLINE}
+ addUserKnob {41 gain_5 l gain T Grade_5.white}
+ addUserKnob {41 aov_6 l "AOV 6" T Shuf_6.in1}
+ addUserKnob {6 mute_6 l mute -STARTLINE}
+ addUserKnob {41 gain_6 l gain T Grade_6.white}
+ addUserKnob {41 aov_7 l "AOV 7" T Shuf_7.in1}
+ addUserKnob {6 mute_7 l mute -STARTLINE}
+ addUserKnob {41 gain_7 l gain T Grade_7.white}
+ addUserKnob {41 aov_8 l "AOV 8" T Shuf_8.in1}
+ addUserKnob {6 mute_8 l mute -STARTLINE}
+ addUserKnob {41 gain_8 l gain T Grade_8.white}
+ addUserKnob {20 vw l "View"}
+ addUserKnob {4 view M {"Result (beauty + changes)" "Rebuild (sum of slots)" "Difference (beauty - sum)" "Solo slot"}}
+ addUserKnob {7 diff_gain l "difference gain" R 1 100}
+ diff_gain 10
+ addUserKnob {3 solo_slot l "solo slot"}
+ solo_slot 1
+ addUserKnob {20 sleepy_about l About}
+ addUserKnob {26 sleepy_about_text l "" +STARTLINE T "<b><font size=\"4\">Sleepy AOVRebuild</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v1.0 &middot; CG &middot; SleepyTools</font><br><br><b>Inputs</b><table><tr><td><b>cg</b>&nbsp;&nbsp;</td><td>CG render with AOV layers</td></tr></table><br><b>How it works</b><br>Rebuild and grade up to 8 light AOVs in one node.<br><br>Pick a layer per slot, give it a gain, or mute it. &#x27;Result&#x27; keeps the beauty and only adds the changes you made (beauty - original slots + graded slots), so anything you didn&#x27;t pick stays exactly as rendered.<br>&#x27;Difference&#x27; shows beauty minus the plain sum of the slots: if your slots are all the light AOVs it should be black, which checks the AOVs add up to the beauty."}
+}
+ BackdropNode {
+  inputs 0
+  name BD_Result_beauty_changes
+  tile_color 0x3a3150ff
+  label "Result: beauty + changes"
+  note_font_size 24
+  xpos -30
+  ypos 310
+  bdwidth 140
+  bdheight 596
+  z_order 0
+ }
+ BackdropNode {
+  inputs 0
+  name BD_AOV_slots
+  tile_color 0x3a3150ff
+  label "AOV slots"
+  note_font_size 24
+  xpos 250
+  ypos 22
+  bdwidth 1120
+  bdheight 812
+  z_order 1
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Check_beauty_AOVs
+  tile_color 0x3a3150ff
+  label "Check: beauty - AOVs"
+  note_font_size 24
+  xpos 1510
+  ypos 238
+  bdwidth 280
+  bdheight 668
+  z_order 2
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Solo
+  tile_color 0x3a3150ff
+  label "Solo"
+  note_font_size 24
+  xpos 1930
+  ypos 238
+  bdwidth 140
+  bdheight 668
+  z_order 3
+ }
+ Input {
+  inputs 0
+  name cg
+  xpos 0
+  ypos 0
+ }
+set N_cg [stack 0]
+ Dot {
+  inputs 1
+  name Dot_cg_1
+  xpos 34
+  ypos 39
+ }
+set N_Dot_cg_1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_cg_1_2
+  xpos 314
+  ypos 39
+ }
+set N_Dot_Dot_cg_1_2 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_cg_1_2_3
+  xpos 454
+  ypos 39
+ }
+set N_Dot_Dot_Dot_cg_1_2_3 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_cg_1_2_3_4
+  xpos 594
+  ypos 39
+ }
+set N_Dot_Dot_Dot_Dot_cg_1_2_3_4 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_cg_1_2_3_4_5
+  xpos 734
+  ypos 39
+ }
+set N_Dot_Dot_Dot_Dot_Dot_cg_1_2_3_4_5 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_cg_1_2_3_4_5_6
+  xpos 874
+  ypos 39
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_cg_1_2_3_4_5_6 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Dot_cg_1_2_3_4_5_6_7
+  xpos 1014
+  ypos 39
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_cg_1_2_3_4_5_6_7 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_cg_1_2_3_4_5_6_7_8
+  xpos 1154
+  ypos 39
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_cg_1_2_3_4_5_6_7_8 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_cg_1_2_3_4_5_6_7_8_9
+  xpos 1294
+  ypos 39
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_cg_1_2_3_4_5_6_7_8_9 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_cg_1_2_3_4_5_6_7_8_9_10
+  xpos 1574
+  ypos 39
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_cg_1_2_3_4_5_6_7_8_9_10 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_cg_1_2_3_4_5_6_7_8_9_10_11
+  xpos 1714
+  ypos 39
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_cg_1_2_3_4_5_6_7_8_9_10_11 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_cg_1_2_3_4_5_6_7_8_9_10_11_12
+  xpos 1994
+  ypos 39
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_cg_1_2_3_4_5_6_7_8_9_10_11_12 [stack 0]
+ Expression {
+  inputs 1
+  expr0 0
+  expr1 0
+  expr2 0
+  name SoloBlack
+  xpos 1960
+  ypos 288
+ }
+set N_SoloBlack [stack 0]
+push $N_Dot_Dot_cg_1_2
+ Shuffle2 {
+  inputs 1
+  fromInput1 {{0} B}
+  in1 none
+  fromInput2 {{0} B}
+  mappings "4 black -1 -1 rgba.red 0 0 black -1 -1 rgba.green 0 1 black -1 -1 rgba.blue 0 2 black -1 -1 rgba.alpha 0 3"
+  name Shuf_1
+  xpos 280
+  ypos 72
+ }
+set N_Shuf_1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Shuf_1_13
+  xpos 314
+  ypos 111
+ }
+set N_Dot_Shuf_1_13 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Shuf_1_13_14
+  xpos 1504
+  ypos 111
+ }
+set N_Dot_Dot_Shuf_1_13_14 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Shuf_1_13_14_15
+  xpos 1504
+  ypos 291
+ }
+set N_Dot_Dot_Dot_Shuf_1_13_14_15 [stack 0]
+push $N_Shuf_1
+ Grade {
+  inputs 1
+  channels rgb
+  name Grade_1
+  xpos 280
+  ypos 144
+ }
+set N_Grade_1 [stack 0]
+ Multiply {
+  inputs 1
+  channels rgb
+  value {{!parent.mute_1}}
+  name Mute_1
+  xpos 280
+  ypos 216
+ }
+set N_Mute_1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Mute_1_16
+  xpos 314
+  ypos 255
+ }
+set N_Dot_Mute_1_16 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Mute_1_16_17
+  xpos 384
+  ypos 255
+ }
+set N_Dot_Dot_Mute_1_16_17 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Mute_1_16_17_18
+  xpos 384
+  ypos 291
+ }
+set N_Dot_Dot_Dot_Mute_1_16_17_18 [stack 0]
+push $N_Dot_Dot_Mute_1_16_17
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Mute_1_16_17_19
+  xpos 1924
+  ypos 255
+ }
+set N_Dot_Dot_Dot_Mute_1_16_17_19 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Mute_1_16_17_19_20
+  xpos 1924
+  ypos 363
+ }
+set N_Dot_Dot_Dot_Dot_Mute_1_16_17_19_20 [stack 0]
+push $N_Dot_Dot_Dot_Mute_1_16_17_18
+push $N_Shuf_1
+ MergeExpression {
+  inputs 2
+  expr0 "Ar-Br"
+  expr1 "Ag-Bg"
+  expr2 "Ab-Bb"
+  channel3 alpha
+  expr3 0
+  name Delta_1
+  xpos 280
+  ypos 288
+ }
+set N_Delta_1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Delta_1_21
+  xpos 314
+  ypos 363
+ }
+set N_Dot_Delta_1_21 [stack 0]
+push $N_cg
+ Merge2 {
+  inputs 2
+  operation plus
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name Apply_1
+  xpos 0
+  ypos 360
+ }
+set N_Apply_1 [stack 0]
+push $N_Dot_Dot_Dot_Shuf_1_13_14_15
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_cg_1_2_3_4_5_6_7_8_9_10
+ Merge2 {
+  inputs 2
+  operation from
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name Left_1
+  xpos 1540
+  ypos 288
+ }
+set N_Left_1 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Mute_1_16_17_19_20
+push $N_SoloBlack
+ Switch {
+  inputs 2
+  which {{parent.solo_slot==1}}
+  name SoloPick_1
+  xpos 1960
+  ypos 360
+ }
+set N_SoloPick_1 [stack 0]
+push $N_Dot_Dot_Dot_cg_1_2_3
+ Shuffle2 {
+  inputs 1
+  fromInput1 {{0} B}
+  in1 none
+  fromInput2 {{0} B}
+  mappings "4 black -1 -1 rgba.red 0 0 black -1 -1 rgba.green 0 1 black -1 -1 rgba.blue 0 2 black -1 -1 rgba.alpha 0 3"
+  name Shuf_2
+  xpos 420
+  ypos 144
+ }
+set N_Shuf_2 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Shuf_2_22
+  xpos 454
+  ypos 183
+ }
+set N_Dot_Shuf_2_22 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Shuf_2_22_23
+  xpos 1516
+  ypos 183
+ }
+set N_Dot_Dot_Shuf_2_22_23 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Shuf_2_22_23_24
+  xpos 1516
+  ypos 363
+ }
+set N_Dot_Dot_Dot_Shuf_2_22_23_24 [stack 0]
+push $N_Shuf_2
+ Grade {
+  inputs 1
+  channels rgb
+  name Grade_2
+  xpos 420
+  ypos 216
+ }
+set N_Grade_2 [stack 0]
+ Multiply {
+  inputs 1
+  channels rgb
+  value {{!parent.mute_2}}
+  name Mute_2
+  xpos 420
+  ypos 288
+ }
+set N_Mute_2 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Mute_2_25
+  xpos 454
+  ypos 327
+ }
+set N_Dot_Mute_2_25 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Mute_2_25_26
+  xpos 524
+  ypos 327
+ }
+set N_Dot_Dot_Mute_2_25_26 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Mute_2_25_26_27
+  xpos 524
+  ypos 363
+ }
+set N_Dot_Dot_Dot_Mute_2_25_26_27 [stack 0]
+push $N_Dot_Dot_Mute_2_25_26
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Mute_2_25_26_28
+  xpos 1936
+  ypos 327
+ }
+set N_Dot_Dot_Dot_Mute_2_25_26_28 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Mute_2_25_26_28_29
+  xpos 1936
+  ypos 435
+ }
+set N_Dot_Dot_Dot_Dot_Mute_2_25_26_28_29 [stack 0]
+push $N_Dot_Dot_Dot_Mute_2_25_26_27
+push $N_Shuf_2
+ MergeExpression {
+  inputs 2
+  expr0 "Ar-Br"
+  expr1 "Ag-Bg"
+  expr2 "Ab-Bb"
+  channel3 alpha
+  expr3 0
+  name Delta_2
+  xpos 420
+  ypos 360
+ }
+set N_Delta_2 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Delta_2_30
+  xpos 454
+  ypos 435
+ }
+set N_Dot_Delta_2_30 [stack 0]
+push $N_Apply_1
+ Merge2 {
+  inputs 2
+  operation plus
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name Apply_2
+  xpos 0
+  ypos 432
+ }
+set N_Apply_2 [stack 0]
+push $N_Dot_Dot_Dot_Shuf_2_22_23_24
+push $N_Left_1
+ Merge2 {
+  inputs 2
+  operation from
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name Left_2
+  xpos 1540
+  ypos 360
+ }
+set N_Left_2 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Mute_2_25_26_28_29
+push $N_SoloPick_1
+ Switch {
+  inputs 2
+  which {{parent.solo_slot==2}}
+  name SoloPick_2
+  xpos 1960
+  ypos 432
+ }
+set N_SoloPick_2 [stack 0]
+push $N_Dot_Dot_Dot_Dot_cg_1_2_3_4
+ Shuffle2 {
+  inputs 1
+  fromInput1 {{0} B}
+  in1 none
+  fromInput2 {{0} B}
+  mappings "4 black -1 -1 rgba.red 0 0 black -1 -1 rgba.green 0 1 black -1 -1 rgba.blue 0 2 black -1 -1 rgba.alpha 0 3"
+  name Shuf_3
+  xpos 560
+  ypos 216
+ }
+set N_Shuf_3 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Shuf_3_31
+  xpos 594
+  ypos 263
+ }
+set N_Dot_Shuf_3_31 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Shuf_3_31_32
+  xpos 1492
+  ypos 263
+ }
+set N_Dot_Dot_Shuf_3_31_32 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Shuf_3_31_32_33
+  xpos 1492
+  ypos 435
+ }
+set N_Dot_Dot_Dot_Shuf_3_31_32_33 [stack 0]
+push $N_Shuf_3
+ Grade {
+  inputs 1
+  channels rgb
+  name Grade_3
+  xpos 560
+  ypos 288
+ }
+set N_Grade_3 [stack 0]
+ Multiply {
+  inputs 1
+  channels rgb
+  value {{!parent.mute_3}}
+  name Mute_3
+  xpos 560
+  ypos 360
+ }
+set N_Mute_3 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Mute_3_34
+  xpos 594
+  ypos 399
+ }
+set N_Dot_Mute_3_34 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Mute_3_34_35
+  xpos 664
+  ypos 399
+ }
+set N_Dot_Dot_Mute_3_34_35 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Mute_3_34_35_36
+  xpos 664
+  ypos 435
+ }
+set N_Dot_Dot_Dot_Mute_3_34_35_36 [stack 0]
+push $N_Dot_Dot_Mute_3_34_35
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Mute_3_34_35_37
+  xpos 1924
+  ypos 399
+ }
+set N_Dot_Dot_Dot_Mute_3_34_35_37 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Mute_3_34_35_37_38
+  xpos 1924
+  ypos 507
+ }
+set N_Dot_Dot_Dot_Dot_Mute_3_34_35_37_38 [stack 0]
+push $N_Dot_Dot_Dot_Mute_3_34_35_36
+push $N_Shuf_3
+ MergeExpression {
+  inputs 2
+  expr0 "Ar-Br"
+  expr1 "Ag-Bg"
+  expr2 "Ab-Bb"
+  channel3 alpha
+  expr3 0
+  name Delta_3
+  xpos 560
+  ypos 432
+ }
+set N_Delta_3 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Delta_3_39
+  xpos 594
+  ypos 507
+ }
+set N_Dot_Delta_3_39 [stack 0]
+push $N_Apply_2
+ Merge2 {
+  inputs 2
+  operation plus
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name Apply_3
+  xpos 0
+  ypos 504
+ }
+set N_Apply_3 [stack 0]
+push $N_Dot_Dot_Dot_Shuf_3_31_32_33
+push $N_Left_2
+ Merge2 {
+  inputs 2
+  operation from
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name Left_3
+  xpos 1540
+  ypos 432
+ }
+set N_Left_3 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Mute_3_34_35_37_38
+push $N_SoloPick_2
+ Switch {
+  inputs 2
+  which {{parent.solo_slot==3}}
+  name SoloPick_3
+  xpos 1960
+  ypos 504
+ }
+set N_SoloPick_3 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_cg_1_2_3_4_5
+ Shuffle2 {
+  inputs 1
+  fromInput1 {{0} B}
+  in1 none
+  fromInput2 {{0} B}
+  mappings "4 black -1 -1 rgba.red 0 0 black -1 -1 rgba.green 0 1 black -1 -1 rgba.blue 0 2 black -1 -1 rgba.alpha 0 3"
+  name Shuf_4
+  xpos 700
+  ypos 288
+ }
+set N_Shuf_4 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Shuf_4_40
+  xpos 734
+  ypos 335
+ }
+set N_Dot_Shuf_4_40 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Shuf_4_40_41
+  xpos 1504
+  ypos 335
+ }
+set N_Dot_Dot_Shuf_4_40_41 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Shuf_4_40_41_42
+  xpos 1504
+  ypos 507
+ }
+set N_Dot_Dot_Dot_Shuf_4_40_41_42 [stack 0]
+push $N_Shuf_4
+ Grade {
+  inputs 1
+  channels rgb
+  name Grade_4
+  xpos 700
+  ypos 360
+ }
+set N_Grade_4 [stack 0]
+ Multiply {
+  inputs 1
+  channels rgb
+  value {{!parent.mute_4}}
+  name Mute_4
+  xpos 700
+  ypos 432
+ }
+set N_Mute_4 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Mute_4_43
+  xpos 734
+  ypos 471
+ }
+set N_Dot_Mute_4_43 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Mute_4_43_44
+  xpos 804
+  ypos 471
+ }
+set N_Dot_Dot_Mute_4_43_44 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Mute_4_43_44_45
+  xpos 804
+  ypos 507
+ }
+set N_Dot_Dot_Dot_Mute_4_43_44_45 [stack 0]
+push $N_Dot_Dot_Mute_4_43_44
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Mute_4_43_44_46
+  xpos 1936
+  ypos 471
+ }
+set N_Dot_Dot_Dot_Mute_4_43_44_46 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Mute_4_43_44_46_47
+  xpos 1936
+  ypos 579
+ }
+set N_Dot_Dot_Dot_Dot_Mute_4_43_44_46_47 [stack 0]
+push $N_Dot_Dot_Dot_Mute_4_43_44_45
+push $N_Shuf_4
+ MergeExpression {
+  inputs 2
+  expr0 "Ar-Br"
+  expr1 "Ag-Bg"
+  expr2 "Ab-Bb"
+  channel3 alpha
+  expr3 0
+  name Delta_4
+  xpos 700
+  ypos 504
+ }
+set N_Delta_4 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Delta_4_48
+  xpos 734
+  ypos 579
+ }
+set N_Dot_Delta_4_48 [stack 0]
+push $N_Apply_3
+ Merge2 {
+  inputs 2
+  operation plus
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name Apply_4
+  xpos 0
+  ypos 576
+ }
+set N_Apply_4 [stack 0]
+push $N_Dot_Dot_Dot_Shuf_4_40_41_42
+push $N_Left_3
+ Merge2 {
+  inputs 2
+  operation from
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name Left_4
+  xpos 1540
+  ypos 504
+ }
+set N_Left_4 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Mute_4_43_44_46_47
+push $N_SoloPick_3
+ Switch {
+  inputs 2
+  which {{parent.solo_slot==4}}
+  name SoloPick_4
+  xpos 1960
+  ypos 576
+ }
+set N_SoloPick_4 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_cg_1_2_3_4_5_6
+ Shuffle2 {
+  inputs 1
+  fromInput1 {{0} B}
+  in1 none
+  fromInput2 {{0} B}
+  mappings "4 black -1 -1 rgba.red 0 0 black -1 -1 rgba.green 0 1 black -1 -1 rgba.blue 0 2 black -1 -1 rgba.alpha 0 3"
+  name Shuf_5
+  xpos 840
+  ypos 360
+ }
+set N_Shuf_5 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Shuf_5_49
+  xpos 874
+  ypos 407
+ }
+set N_Dot_Shuf_5_49 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Shuf_5_49_50
+  xpos 1516
+  ypos 407
+ }
+set N_Dot_Dot_Shuf_5_49_50 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Shuf_5_49_50_51
+  xpos 1516
+  ypos 579
+ }
+set N_Dot_Dot_Dot_Shuf_5_49_50_51 [stack 0]
+push $N_Shuf_5
+ Grade {
+  inputs 1
+  channels rgb
+  name Grade_5
+  xpos 840
+  ypos 432
+ }
+set N_Grade_5 [stack 0]
+ Multiply {
+  inputs 1
+  channels rgb
+  value {{!parent.mute_5}}
+  name Mute_5
+  xpos 840
+  ypos 504
+ }
+set N_Mute_5 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Mute_5_52
+  xpos 874
+  ypos 543
+ }
+set N_Dot_Mute_5_52 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Mute_5_52_53
+  xpos 944
+  ypos 543
+ }
+set N_Dot_Dot_Mute_5_52_53 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Mute_5_52_53_54
+  xpos 944
+  ypos 579
+ }
+set N_Dot_Dot_Dot_Mute_5_52_53_54 [stack 0]
+push $N_Dot_Dot_Mute_5_52_53
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Mute_5_52_53_55
+  xpos 1924
+  ypos 543
+ }
+set N_Dot_Dot_Dot_Mute_5_52_53_55 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Mute_5_52_53_55_56
+  xpos 1924
+  ypos 651
+ }
+set N_Dot_Dot_Dot_Dot_Mute_5_52_53_55_56 [stack 0]
+push $N_Dot_Dot_Dot_Mute_5_52_53_54
+push $N_Shuf_5
+ MergeExpression {
+  inputs 2
+  expr0 "Ar-Br"
+  expr1 "Ag-Bg"
+  expr2 "Ab-Bb"
+  channel3 alpha
+  expr3 0
+  name Delta_5
+  xpos 840
+  ypos 576
+ }
+set N_Delta_5 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Delta_5_57
+  xpos 874
+  ypos 651
+ }
+set N_Dot_Delta_5_57 [stack 0]
+push $N_Apply_4
+ Merge2 {
+  inputs 2
+  operation plus
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name Apply_5
+  xpos 0
+  ypos 648
+ }
+set N_Apply_5 [stack 0]
+push $N_Dot_Dot_Dot_Shuf_5_49_50_51
+push $N_Left_4
+ Merge2 {
+  inputs 2
+  operation from
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name Left_5
+  xpos 1540
+  ypos 576
+ }
+set N_Left_5 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Mute_5_52_53_55_56
+push $N_SoloPick_4
+ Switch {
+  inputs 2
+  which {{parent.solo_slot==5}}
+  name SoloPick_5
+  xpos 1960
+  ypos 648
+ }
+set N_SoloPick_5 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_cg_1_2_3_4_5_6_7
+ Shuffle2 {
+  inputs 1
+  fromInput1 {{0} B}
+  in1 none
+  fromInput2 {{0} B}
+  mappings "4 black -1 -1 rgba.red 0 0 black -1 -1 rgba.green 0 1 black -1 -1 rgba.blue 0 2 black -1 -1 rgba.alpha 0 3"
+  name Shuf_6
+  xpos 980
+  ypos 432
+ }
+set N_Shuf_6 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Shuf_6_58
+  xpos 1014
+  ypos 479
+ }
+set N_Dot_Shuf_6_58 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Shuf_6_58_59
+  xpos 1492
+  ypos 479
+ }
+set N_Dot_Dot_Shuf_6_58_59 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Shuf_6_58_59_60
+  xpos 1492
+  ypos 651
+ }
+set N_Dot_Dot_Dot_Shuf_6_58_59_60 [stack 0]
+push $N_Shuf_6
+ Grade {
+  inputs 1
+  channels rgb
+  name Grade_6
+  xpos 980
+  ypos 504
+ }
+set N_Grade_6 [stack 0]
+ Multiply {
+  inputs 1
+  channels rgb
+  value {{!parent.mute_6}}
+  name Mute_6
+  xpos 980
+  ypos 576
+ }
+set N_Mute_6 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Mute_6_61
+  xpos 1014
+  ypos 615
+ }
+set N_Dot_Mute_6_61 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Mute_6_61_62
+  xpos 1084
+  ypos 615
+ }
+set N_Dot_Dot_Mute_6_61_62 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Mute_6_61_62_63
+  xpos 1084
+  ypos 651
+ }
+set N_Dot_Dot_Dot_Mute_6_61_62_63 [stack 0]
+push $N_Dot_Dot_Mute_6_61_62
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Mute_6_61_62_64
+  xpos 1936
+  ypos 615
+ }
+set N_Dot_Dot_Dot_Mute_6_61_62_64 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Mute_6_61_62_64_65
+  xpos 1936
+  ypos 723
+ }
+set N_Dot_Dot_Dot_Dot_Mute_6_61_62_64_65 [stack 0]
+push $N_Dot_Dot_Dot_Mute_6_61_62_63
+push $N_Shuf_6
+ MergeExpression {
+  inputs 2
+  expr0 "Ar-Br"
+  expr1 "Ag-Bg"
+  expr2 "Ab-Bb"
+  channel3 alpha
+  expr3 0
+  name Delta_6
+  xpos 980
+  ypos 648
+ }
+set N_Delta_6 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Delta_6_66
+  xpos 1014
+  ypos 723
+ }
+set N_Dot_Delta_6_66 [stack 0]
+push $N_Apply_5
+ Merge2 {
+  inputs 2
+  operation plus
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name Apply_6
+  xpos 0
+  ypos 720
+ }
+set N_Apply_6 [stack 0]
+push $N_Dot_Dot_Dot_Shuf_6_58_59_60
+push $N_Left_5
+ Merge2 {
+  inputs 2
+  operation from
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name Left_6
+  xpos 1540
+  ypos 648
+ }
+set N_Left_6 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Mute_6_61_62_64_65
+push $N_SoloPick_5
+ Switch {
+  inputs 2
+  which {{parent.solo_slot==6}}
+  name SoloPick_6
+  xpos 1960
+  ypos 720
+ }
+set N_SoloPick_6 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_cg_1_2_3_4_5_6_7_8
+ Shuffle2 {
+  inputs 1
+  fromInput1 {{0} B}
+  in1 none
+  fromInput2 {{0} B}
+  mappings "4 black -1 -1 rgba.red 0 0 black -1 -1 rgba.green 0 1 black -1 -1 rgba.blue 0 2 black -1 -1 rgba.alpha 0 3"
+  name Shuf_7
+  xpos 1120
+  ypos 504
+ }
+set N_Shuf_7 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Shuf_7_67
+  xpos 1154
+  ypos 551
+ }
+set N_Dot_Shuf_7_67 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Shuf_7_67_68
+  xpos 1504
+  ypos 551
+ }
+set N_Dot_Dot_Shuf_7_67_68 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Shuf_7_67_68_69
+  xpos 1504
+  ypos 723
+ }
+set N_Dot_Dot_Dot_Shuf_7_67_68_69 [stack 0]
+push $N_Shuf_7
+ Grade {
+  inputs 1
+  channels rgb
+  name Grade_7
+  xpos 1120
+  ypos 576
+ }
+set N_Grade_7 [stack 0]
+ Multiply {
+  inputs 1
+  channels rgb
+  value {{!parent.mute_7}}
+  name Mute_7
+  xpos 1120
+  ypos 648
+ }
+set N_Mute_7 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Mute_7_70
+  xpos 1154
+  ypos 687
+ }
+set N_Dot_Mute_7_70 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Mute_7_70_71
+  xpos 1224
+  ypos 687
+ }
+set N_Dot_Dot_Mute_7_70_71 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Mute_7_70_71_72
+  xpos 1224
+  ypos 723
+ }
+set N_Dot_Dot_Dot_Mute_7_70_71_72 [stack 0]
+push $N_Dot_Dot_Mute_7_70_71
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Mute_7_70_71_73
+  xpos 1924
+  ypos 687
+ }
+set N_Dot_Dot_Dot_Mute_7_70_71_73 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Mute_7_70_71_73_74
+  xpos 1924
+  ypos 795
+ }
+set N_Dot_Dot_Dot_Dot_Mute_7_70_71_73_74 [stack 0]
+push $N_Dot_Dot_Dot_Mute_7_70_71_72
+push $N_Shuf_7
+ MergeExpression {
+  inputs 2
+  expr0 "Ar-Br"
+  expr1 "Ag-Bg"
+  expr2 "Ab-Bb"
+  channel3 alpha
+  expr3 0
+  name Delta_7
+  xpos 1120
+  ypos 720
+ }
+set N_Delta_7 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Delta_7_75
+  xpos 1154
+  ypos 795
+ }
+set N_Dot_Delta_7_75 [stack 0]
+push $N_Apply_6
+ Merge2 {
+  inputs 2
+  operation plus
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name Apply_7
+  xpos 0
+  ypos 792
+ }
+set N_Apply_7 [stack 0]
+push $N_Dot_Dot_Dot_Shuf_7_67_68_69
+push $N_Left_6
+ Merge2 {
+  inputs 2
+  operation from
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name Left_7
+  xpos 1540
+  ypos 720
+ }
+set N_Left_7 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Mute_7_70_71_73_74
+push $N_SoloPick_6
+ Switch {
+  inputs 2
+  which {{parent.solo_slot==7}}
+  name SoloPick_7
+  xpos 1960
+  ypos 792
+ }
+set N_SoloPick_7 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_cg_1_2_3_4_5_6_7_8_9
+ Shuffle2 {
+  inputs 1
+  fromInput1 {{0} B}
+  in1 none
+  fromInput2 {{0} B}
+  mappings "4 black -1 -1 rgba.red 0 0 black -1 -1 rgba.green 0 1 black -1 -1 rgba.blue 0 2 black -1 -1 rgba.alpha 0 3"
+  name Shuf_8
+  xpos 1260
+  ypos 576
+ }
+set N_Shuf_8 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Shuf_8_76
+  xpos 1294
+  ypos 623
+ }
+set N_Dot_Shuf_8_76 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Shuf_8_76_77
+  xpos 1516
+  ypos 623
+ }
+set N_Dot_Dot_Shuf_8_76_77 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Shuf_8_76_77_78
+  xpos 1516
+  ypos 795
+ }
+set N_Dot_Dot_Dot_Shuf_8_76_77_78 [stack 0]
+push $N_Shuf_8
+ Grade {
+  inputs 1
+  channels rgb
+  name Grade_8
+  xpos 1260
+  ypos 648
+ }
+set N_Grade_8 [stack 0]
+ Multiply {
+  inputs 1
+  channels rgb
+  value {{!parent.mute_8}}
+  name Mute_8
+  xpos 1260
+  ypos 720
+ }
+set N_Mute_8 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Mute_8_79
+  xpos 1294
+  ypos 759
+ }
+set N_Dot_Mute_8_79 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Mute_8_79_80
+  xpos 1364
+  ypos 759
+ }
+set N_Dot_Dot_Mute_8_79_80 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Mute_8_79_80_81
+  xpos 1364
+  ypos 795
+ }
+set N_Dot_Dot_Dot_Mute_8_79_80_81 [stack 0]
+push $N_Dot_Dot_Mute_8_79_80
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Mute_8_79_80_82
+  xpos 1936
+  ypos 759
+ }
+set N_Dot_Dot_Dot_Mute_8_79_80_82 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Mute_8_79_80_82_83
+  xpos 1936
+  ypos 867
+ }
+set N_Dot_Dot_Dot_Dot_Mute_8_79_80_82_83 [stack 0]
+push $N_Dot_Dot_Dot_Mute_8_79_80_81
+push $N_Shuf_8
+ MergeExpression {
+  inputs 2
+  expr0 "Ar-Br"
+  expr1 "Ag-Bg"
+  expr2 "Ab-Bb"
+  channel3 alpha
+  expr3 0
+  name Delta_8
+  xpos 1260
+  ypos 792
+ }
+set N_Delta_8 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Delta_8_84
+  xpos 1294
+  ypos 867
+ }
+set N_Dot_Delta_8_84 [stack 0]
+push $N_Apply_7
+ Merge2 {
+  inputs 2
+  operation plus
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name Apply_8
+  xpos 0
+  ypos 864
+ }
+set N_Apply_8 [stack 0]
+push $N_Dot_Dot_Dot_Shuf_8_76_77_78
+push $N_Left_7
+ Merge2 {
+  inputs 2
+  operation from
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name Left_8
+  xpos 1540
+  ypos 792
+ }
+set N_Left_8 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Left_8_85
+  xpos 1574
+  ypos 831
+ }
+set N_Dot_Left_8_85 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Left_8_85_86
+  xpos 1644
+  ypos 831
+ }
+set N_Dot_Dot_Left_8_85_86 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Left_8_85_86_87
+  xpos 1644
+  ypos 867
+ }
+set N_Dot_Dot_Dot_Left_8_85_86_87 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Mute_8_79_80_82_83
+push $N_SoloPick_7
+ Switch {
+  inputs 2
+  which {{parent.solo_slot==8}}
+  name SoloPick_8
+  xpos 1960
+  ypos 864
+ }
+set N_SoloPick_8 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_SoloPick_8_88
+  xpos 1994
+  ypos 939
+ }
+set N_Dot_SoloPick_8_88 [stack 0]
+push $N_Dot_Dot_Dot_Left_8_85_86_87
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_cg_1_2_3_4_5_6_7_8_9_10_11
+ MergeExpression {
+  inputs 2
+  expr0 "Br-Ar"
+  expr1 "Bg-Ag"
+  expr2 "Bb-Ab"
+  channel3 alpha
+  expr3 Ba
+  name RebuildSum
+  xpos 1680
+  ypos 864
+ }
+set N_RebuildSum [stack 0]
+ Dot {
+  inputs 1
+  name Dot_RebuildSum_89
+  xpos 1714
+  ypos 939
+ }
+set N_Dot_RebuildSum_89 [stack 0]
+push $N_Left_8
+ Multiply {
+  inputs 1
+  channels rgb
+  value {{parent.diff_gain}}
+  name DiffGain
+  xpos 1540
+  ypos 864
+ }
+set N_DiffGain [stack 0]
+ Dot {
+  inputs 1
+  name Dot_DiffGain_90
+  xpos 1574
+  ypos 939
+ }
+set N_Dot_DiffGain_90 [stack 0]
+push $N_Dot_SoloPick_8_88
+push $N_Dot_DiffGain_90
+push $N_Dot_RebuildSum_89
+push $N_Apply_8
+ Switch {
+  inputs 4
+  which {{parent.view}}
+  name ViewSwitch
+  xpos 0
+  ypos 936
+ }
+set N_ViewSwitch [stack 0]
+ Output {
+  inputs 1
+  name Output1
+  xpos 0
+  ypos 1008
+ }
+set N_Output1 [stack 0]
+end_group

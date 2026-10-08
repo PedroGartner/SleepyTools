@@ -1,0 +1,43 @@
+kernel SleepyNormalCurvature : ImageComputationKernel<ePixelWise>
+{
+  Image<eRead, eAccessRanged2D, eEdgeClamped> src;
+  Image<eWrite> dst;
+
+param:
+  float gain;
+  int spacing;
+  bool encoded;
+  int mode;
+
+local:
+  int s;
+
+  void define() {
+    defineParam(gain, "gain", 0.5f);
+    defineParam(spacing, "spacing", 1);
+    defineParam(encoded, "encoded", false);
+    defineParam(mode, "mode", 0);
+  }
+
+  void init() {
+    s = max(1, spacing);
+    src.setRange(-s, -s, s, s);
+  }
+
+  float2 nxy(int dx, int dy) {
+    SampleType(src) p = src(dx * s, dy * s);
+    float2 v = float2(p.x, p.y);
+    if (encoded) v = v * 2.0f - 1.0f;
+    return v;
+  }
+
+  // divergence of the normal field: positive on bumps (convex), negative in dents (concave)
+  // mode 0 signed (grey = flat), 1 convex only, 2 concave only
+  void process(int2 pos) {
+    float c = ((nxy(1, 0).x - nxy(-1, 0).x) + (nxy(0, 1).y - nxy(0, -1).y)) * 0.5f / s * gain * 10.0f;
+    float v = 0.5f + c;
+    if (mode == 1) v = max(c, 0.0f);
+    if (mode == 2) v = max(-c, 0.0f);
+    dst() = float4(v, v, v, 1.0f);
+  }
+};

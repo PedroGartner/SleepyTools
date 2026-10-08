@@ -1,0 +1,798 @@
+#! C:/Program Files/Nuke13.2v4/nuke-13.2.4.dll -nx
+version 13.2 v4
+Gizmo {
+ tile_color 0x3f9e5aff
+ help "Edge extend (push-pull).\n\nErodes the matte to a clean core, then pushes the core's colour outward to infinity, so semi-transparent edges carry clean foreground colour instead of screen spill or dark fringes. The original alpha is put back.\n\nUse before merging a keyed element over a new background."
+ addUserKnob {20 ee l "Controls"}
+ addUserKnob {26 sleepy_title l "" +STARTLINE T "<b><font size=\"4\">Sleepy EdgeExtend</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v1.0 &middot; Keying</font><br><font color=\"#a8a8a8\">Pushes clean core colour out through soft edges to kill spill and fringes.</font>"}
+ addUserKnob {26 sleepy_title_div l "" +STARTLINE}
+ addUserKnob {6 src_premult l "source is premultiplied" +STARTLINE}
+ src_premult true
+ addUserKnob {7 erode l "core erode" t "Pixels to shrink the matte before sampling colour. Raise it if spill or fringing still shows." R 0 20}
+ erode 1
+ addUserKnob {7 fill_scale l "fill scale" t "Scales every level of the fill. Lower = more local colour, higher = smoother." R 0.25 4}
+ fill_scale 1
+ addUserKnob {7 detail t "How strongly the finer levels win over the coarser ones. Higher keeps more structure near the edge, lower gives a smoother fill." R 1 10}
+ detail 3
+ addUserKnob {26 ""}
+ addUserKnob {6 out_premult l "premultiply output" +STARTLINE}
+ out_premult true
+ addUserKnob {4 view M {Result "Core matte"}}
+ addUserKnob {20 sleepy_about l About}
+ addUserKnob {26 sleepy_about_text l "" +STARTLINE T "<b><font size=\"4\">Sleepy EdgeExtend</font></b>&nbsp;&nbsp;<font color=\"#8c8c8c\">v1.0 &middot; Keying &middot; SleepyTools</font><br><br><b>Inputs</b><table><tr><td><b>Input1</b>&nbsp;&nbsp;</td><td>keyed foreground (premultiplied or not)</td></tr></table><br><b>How it works</b><br>Edge extend (push-pull).<br><br>Erodes the matte to a clean core, then pushes the core&#x27;s colour outward to infinity, so semi-transparent edges carry clean foreground colour instead of screen spill or dark fringes. The original alpha is put back.<br><br>Use before merging a keyed element over a new background."}
+}
+ BackdropNode {
+  inputs 0
+  name BD_Clean_core
+  tile_color 0x2f4a36ff
+  label "Clean core"
+  note_font_size 24
+  xpos 160
+  ypos 22
+  bdwidth 140
+  bdheight 236
+  z_order 0
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Push_pull_fill
+  tile_color 0x2f4a36ff
+  label "Push-pull fill"
+  note_font_size 24
+  xpos 350
+  ypos 166
+  bdwidth 1540
+  bdheight 1100
+  z_order 1
+ }
+ BackdropNode {
+  inputs 0
+  name BD_Output
+  tile_color 0x2f4a36ff
+  label "Output"
+  note_font_size 24
+  xpos 1940
+  ypos 1246
+  bdwidth 140
+  bdheight 164
+  z_order 2
+ }
+ Input {
+  inputs 0
+  name Input1
+  xpos 0
+  ypos 0
+ }
+set N_Input1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Input1_1
+  xpos 34
+  ypos 39
+ }
+set N_Dot_Input1_1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Input1_1_2
+  xpos 224
+  ypos 39
+ }
+set N_Dot_Dot_Input1_1_2 [stack 0]
+ Unpremult {
+  inputs 1
+  channels rgb
+  disable {{!parent.src_premult}}
+  name SrcUnpremult
+  xpos 190
+  ypos 72
+ }
+set N_SrcUnpremult [stack 0]
+ Dot {
+  inputs 1
+  name Dot_SrcUnpremult_3
+  xpos 224
+  ypos 111
+ }
+set N_Dot_SrcUnpremult_3 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_SrcUnpremult_3_4
+  xpos 2004
+  ypos 111
+ }
+set N_Dot_Dot_SrcUnpremult_3_4 [stack 0]
+push $N_SrcUnpremult
+ Dilate {
+  inputs 1
+  channels alpha
+  size {{-parent.erode}}
+  name Core
+  xpos 190
+  ypos 144
+ }
+set N_Core [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Core_5
+  xpos 224
+  ypos 183
+ }
+set N_Dot_Core_5 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Core_5_6
+  xpos 414
+  ypos 183
+ }
+set N_Dot_Dot_Core_5_6 [stack 0]
+push $N_Core
+ Expression {
+  inputs 1
+  expr0 a
+  expr1 a
+  expr2 a
+  name CoreView
+  xpos 190
+  ypos 216
+ }
+set N_CoreView [stack 0]
+ Dot {
+  inputs 1
+  name Dot_CoreView_7
+  xpos 224
+  ypos 1443
+ }
+set N_Dot_CoreView_7 [stack 0]
+push $N_Dot_Dot_Core_5_6
+ Premult {
+  inputs 1
+  channels rgb
+  name CorePremult
+  xpos 380
+  ypos 216
+ }
+set N_CorePremult [stack 0]
+ Dot {
+  inputs 1
+  name Dot_CorePremult_8
+  xpos 414
+  ypos 255
+ }
+set N_Dot_CorePremult_8 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_CorePremult_8_9
+  xpos 554
+  ypos 255
+ }
+set N_Dot_Dot_CorePremult_8_9 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_CorePremult_8_9_10
+  xpos 694
+  ypos 255
+ }
+set N_Dot_Dot_Dot_CorePremult_8_9_10 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_CorePremult_8_9_10_11
+  xpos 834
+  ypos 255
+ }
+set N_Dot_Dot_Dot_Dot_CorePremult_8_9_10_11 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_CorePremult_8_9_10_11_12
+  xpos 974
+  ypos 255
+ }
+set N_Dot_Dot_Dot_Dot_Dot_CorePremult_8_9_10_11_12 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_CorePremult_8_9_10_11_12_13
+  xpos 1114
+  ypos 255
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_CorePremult_8_9_10_11_12_13 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Dot_CorePremult_8_9_10_11_12_13_14
+  xpos 1254
+  ypos 255
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_CorePremult_8_9_10_11_12_13_14 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_CorePremult_8_9_10_11_12_13_14_15
+  xpos 1394
+  ypos 255
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_CorePremult_8_9_10_11_12_13_14_15 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_CorePremult_8_9_10_11_12_13_14_15_16
+  xpos 1534
+  ypos 255
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_CorePremult_8_9_10_11_12_13_14_15_16 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_CorePremult_8_9_10_11_12_13_14_15_16_17
+  xpos 1674
+  ypos 255
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_CorePremult_8_9_10_11_12_13_14_15_16_17 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_CorePremult_8_9_10_11_12_13_14_15_16_17_18
+  xpos 1814
+  ypos 255
+ }
+set N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_CorePremult_8_9_10_11_12_13_14_15_16_17_18 [stack 0]
+ Blur {
+  inputs 1
+  channels rgba
+  size {{parent.fill_scale*1024}}
+  name EE_Blur9
+  xpos 1780
+  ypos 288
+ }
+set N_EE_Blur9 [stack 0]
+ Unpremult {
+  inputs 1
+  channels rgb
+  name EE_Unp9
+  xpos 1780
+  ypos 360
+ }
+set N_EE_Unp9 [stack 0]
+ Expression {
+  inputs 1
+  channel0 alpha
+  expr0 1
+  name EE_Solid9
+  xpos 1780
+  ypos 432
+ }
+set N_EE_Solid9 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_EE_Solid9_19
+  xpos 1814
+  ypos 579
+ }
+set N_Dot_EE_Solid9_19 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_CorePremult_8_9_10_11_12_13_14_15_16_17
+ Blur {
+  inputs 1
+  channels rgba
+  size {{parent.fill_scale*512}}
+  name EE_Blur8
+  xpos 1640
+  ypos 288
+ }
+set N_EE_Blur8 [stack 0]
+ Unpremult {
+  inputs 1
+  channels rgb
+  name EE_Unp8
+  xpos 1640
+  ypos 360
+ }
+set N_EE_Unp8 [stack 0]
+ Expression {
+  inputs 1
+  channel0 alpha
+  expr0 "clamp(a*parent.detail)"
+  name EE_Boost8
+  xpos 1640
+  ypos 432
+ }
+set N_EE_Boost8 [stack 0]
+ Premult {
+  inputs 1
+  channels rgb
+  name EE_Pre8
+  xpos 1640
+  ypos 504
+ }
+set N_EE_Pre8 [stack 0]
+push $N_Dot_EE_Solid9_19
+push $N_EE_Pre8
+ Merge2 {
+  inputs 2
+  operation under
+  name EE_Under8
+  xpos 1640
+  ypos 576
+ }
+set N_EE_Under8 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_EE_Under8_20
+  xpos 1674
+  ypos 651
+ }
+set N_Dot_EE_Under8_20 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_CorePremult_8_9_10_11_12_13_14_15_16
+ Blur {
+  inputs 1
+  channels rgba
+  size {{parent.fill_scale*256}}
+  name EE_Blur7
+  xpos 1500
+  ypos 288
+ }
+set N_EE_Blur7 [stack 0]
+ Unpremult {
+  inputs 1
+  channels rgb
+  name EE_Unp7
+  xpos 1500
+  ypos 360
+ }
+set N_EE_Unp7 [stack 0]
+ Expression {
+  inputs 1
+  channel0 alpha
+  expr0 "clamp(a*parent.detail)"
+  name EE_Boost7
+  xpos 1500
+  ypos 432
+ }
+set N_EE_Boost7 [stack 0]
+ Premult {
+  inputs 1
+  channels rgb
+  name EE_Pre7
+  xpos 1500
+  ypos 504
+ }
+set N_EE_Pre7 [stack 0]
+push $N_Dot_EE_Under8_20
+push $N_EE_Pre7
+ Merge2 {
+  inputs 2
+  operation under
+  name EE_Under7
+  xpos 1500
+  ypos 648
+ }
+set N_EE_Under7 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_EE_Under7_21
+  xpos 1534
+  ypos 723
+ }
+set N_Dot_EE_Under7_21 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_Dot_CorePremult_8_9_10_11_12_13_14_15
+ Blur {
+  inputs 1
+  channels rgba
+  size {{parent.fill_scale*128}}
+  name EE_Blur6
+  xpos 1360
+  ypos 288
+ }
+set N_EE_Blur6 [stack 0]
+ Unpremult {
+  inputs 1
+  channels rgb
+  name EE_Unp6
+  xpos 1360
+  ypos 360
+ }
+set N_EE_Unp6 [stack 0]
+ Expression {
+  inputs 1
+  channel0 alpha
+  expr0 "clamp(a*parent.detail)"
+  name EE_Boost6
+  xpos 1360
+  ypos 432
+ }
+set N_EE_Boost6 [stack 0]
+ Premult {
+  inputs 1
+  channels rgb
+  name EE_Pre6
+  xpos 1360
+  ypos 504
+ }
+set N_EE_Pre6 [stack 0]
+push $N_Dot_EE_Under7_21
+push $N_EE_Pre6
+ Merge2 {
+  inputs 2
+  operation under
+  name EE_Under6
+  xpos 1360
+  ypos 720
+ }
+set N_EE_Under6 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_EE_Under6_22
+  xpos 1394
+  ypos 795
+ }
+set N_Dot_EE_Under6_22 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_Dot_CorePremult_8_9_10_11_12_13_14
+ Blur {
+  inputs 1
+  channels rgba
+  size {{parent.fill_scale*64}}
+  name EE_Blur5
+  xpos 1220
+  ypos 288
+ }
+set N_EE_Blur5 [stack 0]
+ Unpremult {
+  inputs 1
+  channels rgb
+  name EE_Unp5
+  xpos 1220
+  ypos 360
+ }
+set N_EE_Unp5 [stack 0]
+ Expression {
+  inputs 1
+  channel0 alpha
+  expr0 "clamp(a*parent.detail)"
+  name EE_Boost5
+  xpos 1220
+  ypos 432
+ }
+set N_EE_Boost5 [stack 0]
+ Premult {
+  inputs 1
+  channels rgb
+  name EE_Pre5
+  xpos 1220
+  ypos 504
+ }
+set N_EE_Pre5 [stack 0]
+push $N_Dot_EE_Under6_22
+push $N_EE_Pre5
+ Merge2 {
+  inputs 2
+  operation under
+  name EE_Under5
+  xpos 1220
+  ypos 792
+ }
+set N_EE_Under5 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_EE_Under5_23
+  xpos 1254
+  ypos 867
+ }
+set N_Dot_EE_Under5_23 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_Dot_CorePremult_8_9_10_11_12_13
+ Blur {
+  inputs 1
+  channels rgba
+  size {{parent.fill_scale*32}}
+  name EE_Blur4
+  xpos 1080
+  ypos 288
+ }
+set N_EE_Blur4 [stack 0]
+ Unpremult {
+  inputs 1
+  channels rgb
+  name EE_Unp4
+  xpos 1080
+  ypos 360
+ }
+set N_EE_Unp4 [stack 0]
+ Expression {
+  inputs 1
+  channel0 alpha
+  expr0 "clamp(a*parent.detail)"
+  name EE_Boost4
+  xpos 1080
+  ypos 432
+ }
+set N_EE_Boost4 [stack 0]
+ Premult {
+  inputs 1
+  channels rgb
+  name EE_Pre4
+  xpos 1080
+  ypos 504
+ }
+set N_EE_Pre4 [stack 0]
+push $N_Dot_EE_Under5_23
+push $N_EE_Pre4
+ Merge2 {
+  inputs 2
+  operation under
+  name EE_Under4
+  xpos 1080
+  ypos 864
+ }
+set N_EE_Under4 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_EE_Under4_24
+  xpos 1114
+  ypos 939
+ }
+set N_Dot_EE_Under4_24 [stack 0]
+push $N_Dot_Dot_Dot_Dot_Dot_CorePremult_8_9_10_11_12
+ Blur {
+  inputs 1
+  channels rgba
+  size {{parent.fill_scale*16}}
+  name EE_Blur3
+  xpos 940
+  ypos 288
+ }
+set N_EE_Blur3 [stack 0]
+ Unpremult {
+  inputs 1
+  channels rgb
+  name EE_Unp3
+  xpos 940
+  ypos 360
+ }
+set N_EE_Unp3 [stack 0]
+ Expression {
+  inputs 1
+  channel0 alpha
+  expr0 "clamp(a*parent.detail)"
+  name EE_Boost3
+  xpos 940
+  ypos 432
+ }
+set N_EE_Boost3 [stack 0]
+ Premult {
+  inputs 1
+  channels rgb
+  name EE_Pre3
+  xpos 940
+  ypos 504
+ }
+set N_EE_Pre3 [stack 0]
+push $N_Dot_EE_Under4_24
+push $N_EE_Pre3
+ Merge2 {
+  inputs 2
+  operation under
+  name EE_Under3
+  xpos 940
+  ypos 936
+ }
+set N_EE_Under3 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_EE_Under3_25
+  xpos 974
+  ypos 1011
+ }
+set N_Dot_EE_Under3_25 [stack 0]
+push $N_Dot_Dot_Dot_Dot_CorePremult_8_9_10_11
+ Blur {
+  inputs 1
+  channels rgba
+  size {{parent.fill_scale*8}}
+  name EE_Blur2
+  xpos 800
+  ypos 288
+ }
+set N_EE_Blur2 [stack 0]
+ Unpremult {
+  inputs 1
+  channels rgb
+  name EE_Unp2
+  xpos 800
+  ypos 360
+ }
+set N_EE_Unp2 [stack 0]
+ Expression {
+  inputs 1
+  channel0 alpha
+  expr0 "clamp(a*parent.detail)"
+  name EE_Boost2
+  xpos 800
+  ypos 432
+ }
+set N_EE_Boost2 [stack 0]
+ Premult {
+  inputs 1
+  channels rgb
+  name EE_Pre2
+  xpos 800
+  ypos 504
+ }
+set N_EE_Pre2 [stack 0]
+push $N_Dot_EE_Under3_25
+push $N_EE_Pre2
+ Merge2 {
+  inputs 2
+  operation under
+  name EE_Under2
+  xpos 800
+  ypos 1008
+ }
+set N_EE_Under2 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_EE_Under2_26
+  xpos 834
+  ypos 1083
+ }
+set N_Dot_EE_Under2_26 [stack 0]
+push $N_Dot_Dot_Dot_CorePremult_8_9_10
+ Blur {
+  inputs 1
+  channels rgba
+  size {{parent.fill_scale*4}}
+  name EE_Blur1
+  xpos 660
+  ypos 288
+ }
+set N_EE_Blur1 [stack 0]
+ Unpremult {
+  inputs 1
+  channels rgb
+  name EE_Unp1
+  xpos 660
+  ypos 360
+ }
+set N_EE_Unp1 [stack 0]
+ Expression {
+  inputs 1
+  channel0 alpha
+  expr0 "clamp(a*parent.detail)"
+  name EE_Boost1
+  xpos 660
+  ypos 432
+ }
+set N_EE_Boost1 [stack 0]
+ Premult {
+  inputs 1
+  channels rgb
+  name EE_Pre1
+  xpos 660
+  ypos 504
+ }
+set N_EE_Pre1 [stack 0]
+push $N_Dot_EE_Under2_26
+push $N_EE_Pre1
+ Merge2 {
+  inputs 2
+  operation under
+  name EE_Under1
+  xpos 660
+  ypos 1080
+ }
+set N_EE_Under1 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_EE_Under1_27
+  xpos 694
+  ypos 1155
+ }
+set N_Dot_EE_Under1_27 [stack 0]
+push $N_Dot_Dot_CorePremult_8_9
+ Blur {
+  inputs 1
+  channels rgba
+  size {{parent.fill_scale*2}}
+  name EE_Blur0
+  xpos 520
+  ypos 288
+ }
+set N_EE_Blur0 [stack 0]
+ Unpremult {
+  inputs 1
+  channels rgb
+  name EE_Unp0
+  xpos 520
+  ypos 360
+ }
+set N_EE_Unp0 [stack 0]
+ Expression {
+  inputs 1
+  channel0 alpha
+  expr0 "clamp(a*parent.detail)"
+  name EE_Boost0
+  xpos 520
+  ypos 432
+ }
+set N_EE_Boost0 [stack 0]
+ Premult {
+  inputs 1
+  channels rgb
+  name EE_Pre0
+  xpos 520
+  ypos 504
+ }
+set N_EE_Pre0 [stack 0]
+push $N_Dot_EE_Under1_27
+push $N_EE_Pre0
+ Merge2 {
+  inputs 2
+  operation under
+  name EE_Under0
+  xpos 520
+  ypos 1152
+ }
+set N_EE_Under0 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_EE_Under0_28
+  xpos 554
+  ypos 1227
+ }
+set N_Dot_EE_Under0_28 [stack 0]
+push $N_CorePremult
+ Merge2 {
+  inputs 2
+  operation under
+  name EE_Original
+  xpos 380
+  ypos 1224
+ }
+set N_EE_Original [stack 0]
+ Dot {
+  inputs 1
+  name Dot_EE_Original_29
+  xpos 414
+  ypos 1299
+ }
+set N_Dot_EE_Original_29 [stack 0]
+push $N_Dot_Dot_SrcUnpremult_3_4
+ Copy {
+  inputs 2
+  channels rgb
+  name FilledRGB
+  xpos 1970
+  ypos 1296
+ }
+set N_FilledRGB [stack 0]
+ Premult {
+  inputs 1
+  channels rgb
+  disable {{!parent.out_premult}}
+  name OutPremult
+  xpos 1970
+  ypos 1368
+ }
+set N_OutPremult [stack 0]
+ Dot {
+  inputs 1
+  name Dot_OutPremult_30
+  xpos 2004
+  ypos 1407
+ }
+set N_Dot_OutPremult_30 [stack 0]
+ Dot {
+  inputs 1
+  name Dot_Dot_OutPremult_30_31
+  xpos 34
+  ypos 1407
+ }
+set N_Dot_Dot_OutPremult_30_31 [stack 0]
+push $N_Dot_CoreView_7
+push $N_Dot_Dot_OutPremult_30_31
+ Switch {
+  inputs 2
+  which {{parent.view}}
+  name ViewSwitch
+  xpos 0
+  ypos 1440
+ }
+set N_ViewSwitch [stack 0]
+ Output {
+  inputs 1
+  name Output1
+  xpos 0
+  ypos 1512
+ }
+set N_Output1 [stack 0]
+end_group
